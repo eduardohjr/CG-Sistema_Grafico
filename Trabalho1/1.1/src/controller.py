@@ -44,5 +44,5 @@ class Controller():
     def clearEvent(self):
         self.__viewport.scene().clear()
 
-    def zoomInEffect(self):
+    def zoomInEvent(self):
         pass
