@@ -44,7 +44,7 @@ class Window(QMainWindow):
         zoom_in = QtWidgets.QPushButton(self)
         zoom_in.setText("IN")
         zoom_in.setGeometry(230,310,const.BUTTON_WIDTH,const.BUTTON_HEIGHT)
-        zoom_in.clicked.connect(self.controller.zoomInEffect)
+        zoom_in.clicked.connect(self.controller.zoomInEvent)
 
         zoom_out = QtWidgets.QPushButton(self)
         zoom_out.setText("OUT")
@@ -59,5 +59,3 @@ class Window(QMainWindow):
         clear.setText("Clear")
         clear.setGeometry(180, 10, (const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
         clear.clicked.connect(self.controller.clearEvent)
-
-
