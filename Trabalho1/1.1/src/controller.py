@@ -17,7 +17,7 @@ class Controller():
         if (len(self.__viewport.coordenates) == 0):
             print("Nenhum ponto selecionado")
 
-        if (len(self.__viewport.coordenates) == 1):
+        elif (len(self.__viewport.coordenates) == 1):
             point = Point(self.__viewport.coordenates, self.__current_id)
             self.__current_id += 1
             self.__viewport.objects.append(point)
@@ -43,6 +43,7 @@ class Controller():
 
     def clearEvent(self):
         self.__viewport.scene().clear()
+        self.__current_id = 1
 
     def zoomInEvent(self):
         pass
