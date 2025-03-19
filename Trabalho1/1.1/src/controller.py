@@ -45,5 +45,4 @@ class Controller():
         self.__viewport.scene().clear()
 
     def zoomInEffect(self):
-        for object in self.__viewport.objects:
-            print(object.getPoints())
+        pass
