@@ -51,11 +51,13 @@ class Window(QMainWindow):
         zoom_in = QPushButton(self)
         zoom_in.setText("IN")
         zoom_in.setGeometry(230,310,const.BUTTON_WIDTH,const.BUTTON_HEIGHT)
+        zoom_in.clicked.connect(self.controller.zoomInEvent)
 
         zoom_out = QPushButton(self)
         zoom_out.setText("OUT")
         zoom_out.setGeometry(230,360,const.BUTTON_WIDTH,const.BUTTON_HEIGHT)
-
+        zoom_out.clicked.connect(self.controller.zoomOutEvent)
+        
         draw = QPushButton(self)
         draw.setText("Draw")
         draw.setGeometry(30,10,(const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
@@ -77,8 +79,6 @@ class Window(QMainWindow):
 
     def mousePressEvent(self, event):
         self.tree.clearSelection()
-
-    
 
         
 

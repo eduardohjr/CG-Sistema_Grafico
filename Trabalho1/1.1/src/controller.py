@@ -88,5 +88,10 @@ class Controller():
         self.__model.setItem(self.treeIndex,1, itemCoordenates)
         self.treeIndex += 1
 
-        
+    def zoomInEvent(self):
+        self.__viewport.scale(self.zoomIn_mutiplier, self.zoomIn_mutiplier)
+    
+    def zoomOutEvent(self):
+        self.__viewport.scale(self.zoomOut_multiplier, self.zoomOut_multiplier)
+
 
