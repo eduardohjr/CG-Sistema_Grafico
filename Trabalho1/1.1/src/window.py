@@ -68,18 +68,7 @@ class Window(QMainWindow):
         clear.setGeometry(180, 10, (const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
         clear.clicked.connect(self.controller.clearEvent)
 
-    # def createTreeView(self):
-    #     self.tree = QTreeView(self)
-    #     self.tree.setGeometry(const.TREE_XPOS, const.TREE_YPOS, const.TREE_WIDTH, const.TREE_HEIGHT)
-    #     self.tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
-    #     self.model = QStandardItemModel()
-    #     self.model.setHorizontalHeaderLabels(["Id", "Coordenates"])
-    #     self.tree.setModel(self.model)
-
     def mousePressEvent(self, event):
         self.tree.clearSelection()
 
         
-
-
