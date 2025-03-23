@@ -19,10 +19,7 @@ class Controller():
 
         object = None
 
-        if (len(self.__viewport.coordenates) == 0):
-            print("Nenhum ponto selecionado")
-
-        elif (len(self.__viewport.coordenates) == 1):
+        if (len(self.__viewport.coordenates) == 1):
             object = Point(self.__viewport.coordenates, self.__current_id)
         elif (len(self.__viewport.coordenates) == 2):
             object = Line(self.__viewport.coordenates, self.__current_id)
@@ -48,7 +45,7 @@ class Controller():
             self.clearText()
             self.__viewport.coordenates.clear()
         else:
-            self.__scene .clear() #AQUI DA ERRO SE DER CLEAR DEPOIS DE SO SELECIONAR OS PONTS
+            self.__scene .clear()
             self.__viewport.coordenates.clear()
             self.__viewport.objects.clear()
             self.__current_id = 1
@@ -82,7 +79,7 @@ class Controller():
                 item.moveBy(self.move_multiplier, 0)
 
     def updateTree(self, object):
-        itemID = QStandardItem(str(object.getId()))
+        itemID = QStandardItem("graphicObject" + str(object.getId()))
         itemCoordenates = QStandardItem(str(object.getPoints()))
         self.__model.setItem(self.treeIndex,0, itemID)
         self.__model.setItem(self.treeIndex,1, itemCoordenates)
@@ -93,5 +90,3 @@ class Controller():
     
     def zoomOutEvent(self):
         self.__viewport.scale(self.zoomOut_multiplier, self.zoomOut_multiplier)
-
-
