@@ -1,6 +1,7 @@
 from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtWidgets import QTreeView, QAbstractItemView, QScrollBar, QHeaderView
 from PyQt5.QtCore import Qt
+from constants import TREE_HEADER_MINIMUM_SIZE
 
 class Tree(QTreeView):
     def __init__(self, parent):
@@ -19,6 +20,4 @@ class Tree(QTreeView):
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(QHeaderView.ResizeToContents)
 
-        self.header().setMinimumSectionSize(70)
-
-
+        self.header().setMinimumSectionSize(TREE_HEADER_MINIMUM_SIZE)
