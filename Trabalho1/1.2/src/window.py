@@ -70,13 +70,19 @@ class Window(QMainWindow):
 
         translate = QPushButton(self)
         translate.setText("Translate")
-        translate.setGeometry(30, 440, (const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
+        translate.setGeometry(60, 440, (const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
         translate.clicked.connect(lambda : self.controller.translateEvent(self))
 
         escalonate = QPushButton(self)
         escalonate.setText("Escalonate")
-        escalonate.setGeometry(30, 490, (const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
+        escalonate.setGeometry(190, 440, (const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
         escalonate.clicked.connect(lambda : self.controller.escalonateEvent(self))
+
+        rotate = QPushButton(self)
+        rotate.setText("Rotate")
+        rotate.setGeometry(320, 440, (const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
+        rotate.clicked.connect(lambda : self.controller.rotateEvent(self))
+
 
     def mousePressEvent(self, event):
         self.tree.clearSelection()

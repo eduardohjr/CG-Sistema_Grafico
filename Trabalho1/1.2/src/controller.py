@@ -1,8 +1,8 @@
 
 from graphicObject import Point, Line, Polygon
 from PyQt5.QtGui import QStandardItem
-from PyQt5.QtWidgets import QInputDialog, QMessageBox
-
+from PyQt5.QtWidgets import QInputDialog, QMessageBox, QWidget, QVBoxLayout, QTabBar, QLabel, QLineEdit, QComboBox, QStackedWidget, QPushButton
+from PyQt5.QtCore import Qt
 
 class Controller():
     def __init__(self, viewport, tree):
@@ -101,6 +101,13 @@ class Controller():
             graphicObject.escalonation(input, self.__viewport)
             self.updateTree(graphicObject, index)
 
+    def rotateEvent(self, window):
+        if(self.__tree.selectedIndexes()):
+            index = self.__tree.selectedIndexes()[0].row()
+            graphicObject = self.__viewport.objects[index]
+            input = self.selectRotation(window, graphicObject, index)
+
+
     def addTree(self, object):
         itemID = QStandardItem("graphicObject" + str(self.__current_id))
         itemCoordenates = QStandardItem(str(object.getPoints()))
@@ -116,6 +123,96 @@ class Controller():
             result.append((float(coordenate[0]), float(coordenate[1])))
         result = QStandardItem(str(result))
         self.__model.setItem(index,1, result)
+
+    def selectRotation(self, window, graphicObject, index):
+        self.dialog = QWidget()
+        self.dialog.setWindowTitle("QTabBar")
+        self.dialog.setGeometry(100, 100, 360, 150)
+
+        layout = QVBoxLayout()
+        self.tab_bar = QTabBar()
+        self.tab_bar.setShape(QTabBar.RoundedNorth)
+        self.tab_content = QStackedWidget()
+        self.tab_bar.addTab("")
+        self.tab_bar.addTab("Centro do mundo")
+        self.tab_bar.addTab("centro do objeto")
+        self.tab_bar.addTab("Ponto qualquer")
+
+        self.setupTab1()
+        self.rotateOnWorld(graphicObject, index)
+        self.rotateOnCenter(graphicObject, index)
+        self.rotateOnPoint(graphicObject, index)
+
+        self.tab_bar.currentChanged.connect(self.tab_content.setCurrentIndex)
+        layout.addWidget(self.tab_bar, alignment=Qt.AlignLeft)
+        layout.addWidget(self.tab_content)
+        self.dialog.setLayout(layout)
+        self.dialog.show()
+
+    def setupTab1(self):
+        tab1_content = QLabel("Selecione uma forma de rotação acima")
+        tab1_content.setAlignment(Qt.AlignCenter)
+        self.tab_content.addWidget(tab1_content)
+
+    def rotateOnWorld(self, graphicObject, index):
+        tab2_widget = QWidget()
+        tab2_layout = QVBoxLayout()
+        helper_text = QLabel("Digite o ângulo para o objeto ser rotacionado:")
+        helper_text.setAlignment(Qt.AlignCenter)
+        self.angle_input = QLineEdit()
+        self.angle_input.setPlaceholderText("Digite o ângulo aqui...")
+        execute_button = QPushButton("Executar")
+        execute_button.clicked.connect(self.executeRotWorld)
+        tab2_layout.addWidget(helper_text)
+        tab2_layout.addWidget(self.angle_input)
+        tab2_layout.addWidget(execute_button)
+        tab2_layout.setAlignment(Qt.AlignCenter)
+        tab2_widget.setLayout(tab2_layout)
+        self.tab_content.addWidget(tab2_widget)
+
+    def rotateOnCenter(self, graphicObject, index):
+        tab2_widget = QWidget()
+        tab2_layout = QVBoxLayout()
+        helper_text = QLabel("Digite o ângulo para o objeto ser rotacionado:")
+        helper_text.setAlignment(Qt.AlignCenter)
+        self.angle_input2 = QLineEdit()
+        self.angle_input2.setPlaceholderText("Digite o ângulo aqui...")
+        execute_button = QPushButton("Executar")
+        execute_button.clicked.connect(self.executeRotCenter)
+        tab2_layout.addWidget(helper_text)
+        tab2_layout.addWidget(self.angle_input2)
+        tab2_layout.addWidget(execute_button)
+        tab2_layout.setAlignment(Qt.AlignCenter)
+        tab2_widget.setLayout(tab2_layout)
+        self.tab_content.addWidget(tab2_widget)
+
+    def rotateOnPoint(self, graphicObject, index):
+        tab2_widget = QWidget()
+        tab2_layout = QVBoxLayout()
+        helper_text = QLabel("Digite o ponto para o objeto ser rotacionado:")
+        helper_text.setAlignment(Qt.AlignCenter)
+        self.angle_input3 = QLineEdit()
+        self.angle_input3.setPlaceholderText("Ex: x,y")
+        execute_button = QPushButton("Executar")
+        execute_button.clicked.connect(self.executeRotPoint)
+        tab2_layout.addWidget(helper_text)
+        tab2_layout.addWidget(self.angle_input3)
+        tab2_layout.addWidget(execute_button)
+        tab2_layout.setAlignment(Qt.AlignCenter)
+        tab2_widget.setLayout(tab2_layout)
+        self.tab_content.addWidget(tab2_widget)
+
+    def executeRotWorld(self):
+        angle = self.angle_input.text()
+        print(angle)
+
+    def executeRotCenter(self):
+        angle = self.angle_input2.text()
+        print(angle)
+
+    def executeRotPoint(self):
+        angle = self.angle_input3.text()
+        print(angle)
 
     def takeInputs(self, window):
         coordenates, done1 = QInputDialog.getText(
