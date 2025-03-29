@@ -90,8 +90,8 @@ class Controller():
             index = self.__tree.selectedIndexes()[0].row()
             graphicObject = self.__viewport.objects[index]
             input = self.takeInputs(window)
-            graphicObject.translation(input)
-            self.updateTree(graphicObject, index)
+            graphicObject.translation(input,self.__viewport)
+            self.updateObject(graphicObject, index)
 
     def escalonateEvent(self, window):
         if(self.__tree.selectedIndexes()):
@@ -99,13 +99,13 @@ class Controller():
             graphicObject =self.__viewport.objects[index]
             input = self.takeInputs(window)
             graphicObject.escalonation(input, self.__viewport)
-            self.updateTree(graphicObject, index)
+            self.updateObject(graphicObject, index)
 
-    def rotateEvent(self, window):
+    def rotateEvent(self):
         if(self.__tree.selectedIndexes()):
             index = self.__tree.selectedIndexes()[0].row()
             graphicObject = self.__viewport.objects[index]
-            input = self.selectRotation(window, graphicObject, index)
+            self.selectRotation(graphicObject, index)
 
 
     def addTree(self, object):
@@ -116,17 +116,19 @@ class Controller():
         self.treeIndex += 1
         self.__current_id += 1
 
-    def updateTree(self, object, index):
+    def updateObject(self, object, index):
         newCoordenates = object.getPoints()
+        object.center = object.calculateCenter()
+
         result = []
         for coordenate in newCoordenates:
             result.append((float(coordenate[0]), float(coordenate[1])))
         result = QStandardItem(str(result))
         self.__model.setItem(index,1, result)
 
-    def selectRotation(self, window, graphicObject, index):
+    def selectRotation(self, graphicObject, index):
         self.dialog = QWidget()
-        self.dialog.setWindowTitle("QTabBar")
+        self.dialog.setWindowTitle("Choice of rotation")
         self.dialog.setGeometry(100, 100, 360, 150)
 
         layout = QVBoxLayout()
@@ -134,9 +136,9 @@ class Controller():
         self.tab_bar.setShape(QTabBar.RoundedNorth)
         self.tab_content = QStackedWidget()
         self.tab_bar.addTab("")
-        self.tab_bar.addTab("Centro do mundo")
-        self.tab_bar.addTab("centro do objeto")
-        self.tab_bar.addTab("Ponto qualquer")
+        self.tab_bar.addTab("Center of the world")
+        self.tab_bar.addTab("center of the object")
+        self.tab_bar.addTab("Any point")
 
         self.setupTab1()
         self.rotateOnWorld(graphicObject, index)
@@ -150,19 +152,19 @@ class Controller():
         self.dialog.show()
 
     def setupTab1(self):
-        tab1_content = QLabel("Selecione uma forma de rotação acima")
+        tab1_content = QLabel("Select a rotation above")
         tab1_content.setAlignment(Qt.AlignCenter)
         self.tab_content.addWidget(tab1_content)
 
     def rotateOnWorld(self, graphicObject, index):
         tab2_widget = QWidget()
         tab2_layout = QVBoxLayout()
-        helper_text = QLabel("Digite o ângulo para o objeto ser rotacionado:")
+        helper_text = QLabel("Enter the point and angle for the object to be rotated:")
         helper_text.setAlignment(Qt.AlignCenter)
         self.angle_input = QLineEdit()
-        self.angle_input.setPlaceholderText("Digite o ângulo aqui...")
-        execute_button = QPushButton("Executar")
-        execute_button.clicked.connect(self.executeRotWorld)
+        self.angle_input.setPlaceholderText("Enter the angle here...")
+        execute_button = QPushButton("Execute")
+        execute_button.clicked.connect(lambda : self.executeRotWorld(graphicObject, index))
         tab2_layout.addWidget(helper_text)
         tab2_layout.addWidget(self.angle_input)
         tab2_layout.addWidget(execute_button)
@@ -173,12 +175,12 @@ class Controller():
     def rotateOnCenter(self, graphicObject, index):
         tab2_widget = QWidget()
         tab2_layout = QVBoxLayout()
-        helper_text = QLabel("Digite o ângulo para o objeto ser rotacionado:")
+        helper_text = QLabel("Enter the point and angle for the object to be rotated:")
         helper_text.setAlignment(Qt.AlignCenter)
         self.angle_input2 = QLineEdit()
-        self.angle_input2.setPlaceholderText("Digite o ângulo aqui...")
-        execute_button = QPushButton("Executar")
-        execute_button.clicked.connect(self.executeRotCenter)
+        self.angle_input2.setPlaceholderText("Enter the angle here...")
+        execute_button = QPushButton("Execute")
+        execute_button.clicked.connect(lambda: self.executeRotCenter(graphicObject, index))
         tab2_layout.addWidget(helper_text)
         tab2_layout.addWidget(self.angle_input2)
         tab2_layout.addWidget(execute_button)
@@ -189,12 +191,12 @@ class Controller():
     def rotateOnPoint(self, graphicObject, index):
         tab2_widget = QWidget()
         tab2_layout = QVBoxLayout()
-        helper_text = QLabel("Digite o ponto para o objeto ser rotacionado:")
+        helper_text = QLabel("Enter the point and angle for the object to be rotated:")
         helper_text.setAlignment(Qt.AlignCenter)
         self.angle_input3 = QLineEdit()
-        self.angle_input3.setPlaceholderText("Ex: x,y")
-        execute_button = QPushButton("Executar")
-        execute_button.clicked.connect(self.executeRotPoint)
+        self.angle_input3.setPlaceholderText("Ex: x,y,45")
+        execute_button = QPushButton("Execute")
+        execute_button.clicked.connect(lambda: self.executeRotPoint(graphicObject, index))
         tab2_layout.addWidget(helper_text)
         tab2_layout.addWidget(self.angle_input3)
         tab2_layout.addWidget(execute_button)
@@ -202,33 +204,55 @@ class Controller():
         tab2_widget.setLayout(tab2_layout)
         self.tab_content.addWidget(tab2_widget)
 
-    def executeRotWorld(self):
+    def executeRotWorld(self, object, index):
         angle = self.angle_input.text()
-        print(angle)
+        try:
 
-    def executeRotCenter(self):
+            object.rotationWord(float(angle), self.__viewport)
+            self.updateObject(object, index)
+            self.dialog.destroy()
+        except:
+            self.instructionsPopUp
+
+    def executeRotCenter(self, object, index):
         angle = self.angle_input2.text()
-        print(angle)
+        try:
+            object.rotationCenter(float(angle), self.__viewport)
+            self.updateObject(object, index)
+            self.dialog.destroy()
+        except:
+            self.instructionsPopUp()
 
-    def executeRotPoint(self):
-        angle = self.angle_input3.text()
-        print(angle)
+    def executeRotPoint(self, object, index):
+        inputs = self.angle_input3.text()
+        try:
+            inputs = tuple(map(float, inputs.split(',')))
+            angle = inputs[2]
+            points = [inputs[i] for i in range(0,2)]
+            if (len(inputs) == 3):
+                object.rotationPoint(angle, points, self.__viewport)
+                self.updateObject(object, index)
+                self.dialog.destroy()
+            else:
+                self.commaPopUp(2)
+        except:
+            self.instructionsPopUp()
+        
 
     def takeInputs(self, window):
-        coordenates, done1 = QInputDialog.getText(
-            window, 'Input Dialog', 'Give scale like this -> x,y :') 
+        coordenates, done = QInputDialog.getText(
+            window, 'Input Dialog', 'Give points like this -> x,y :') 
 
-        if done1 :
+        if done :
             try:
                 coordenates = tuple(map(float, coordenates.split(',')))
                 if (len(coordenates) == 2):
                     return coordenates
                 else:
-                    self.commaPopUp()
+                    self.commaPopUp(1)
             except:
                 self.instructionsPopUp()
             
-        
     def instructionsPopUp(self):
         msg = QMessageBox()
         msg.setWindowTitle("ERROR")
@@ -237,13 +261,17 @@ class Controller():
 
         x = msg.exec_()
 
-    def commaPopUp(self):
+    def commaPopUp(self, type):
         msg = QMessageBox()
         msg.setWindowTitle("ERROR")
-        msg.setText("Give only one coordenate (x,y) \n"
-                    "Use '.' to separate fractional numbers")
+        if type == 1:
+            msg.setText("Give only one coordenate (x,y) \n"
+                        "Use '.' to separate fractional numbers")
+        elif type == 2:
+            msg.setText("Give only one coordenate (x,y) and one angle (n)\n"
+                        "Use '.' to separate fractional numbers")
+            
         msg.setIcon(QMessageBox.Question)
-
         x = msg.exec_()
 
 

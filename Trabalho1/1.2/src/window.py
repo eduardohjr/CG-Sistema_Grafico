@@ -81,7 +81,7 @@ class Window(QMainWindow):
         rotate = QPushButton(self)
         rotate.setText("Rotate")
         rotate.setGeometry(320, 440, (const.BUTTON_WIDTH*2), const.BUTTON_HEIGHT)
-        rotate.clicked.connect(lambda : self.controller.rotateEvent(self))
+        rotate.clicked.connect(self.controller.rotateEvent)
 
 
     def mousePressEvent(self, event):
