@@ -377,7 +377,7 @@ class Controller():
                     for line in mtl_file:
                         line = line.strip()
                         if line.startswith('newmtl '):
-                            current_mtl = line[7:]  # Get the material name after 'newmtl '
+                            current_mtl = line[7:]
                         elif line.startswith('Kd') and current_mtl:
                             try:
                                 parts = line.split()
@@ -393,7 +393,7 @@ class Controller():
             with open(filename, 'r') as file:
                 current_vertices = []
                 current_edges = []
-                current_color = None
+                self.current_color = None  # Track current color at instance level
                 
                 for line in file:
                     line = line.strip()
@@ -423,25 +423,19 @@ class Controller():
                         try:
                             color_key = parts[1]
                             if color_key in colors:
-                                current_color = colors[color_key]
+                                self.current_color = colors[color_key]  # Update instance color
                         except (IndexError, ValueError):
                             continue
                     
                     if (parts[0] == 'o' or not line) and current_vertices:
                         obj = self._create_object_from_data(current_vertices, current_edges)
-                        if current_color and obj:
-                            obj.color = current_color
-                            obj.draw(self.__viewport)
                         current_vertices = []
                         current_edges = []
-                        current_color = None
+                        self.current_color = None  # Reset color after object creation
                         
                 if current_vertices:
                     obj = self._create_object_from_data(current_vertices, current_edges)
-                    if current_color and obj:
-                        obj.color = current_color
-                        obj.draw(self.__viewport)
-                        
+                    
             self.__viewport.update()
                         
         except Exception as e:
@@ -450,7 +444,7 @@ class Controller():
             msg.setText(f"Failed to load file: {str(e)}")
             msg.setIcon(QMessageBox.Warning)
             msg.exec_()
-
+            
     def _create_object_from_data(self, vertices, edges):
         points = []
         if edges:
@@ -469,9 +463,11 @@ class Controller():
         else:
             obj = Polygon(points)
         
-        # Set default color if none exists
-        if not hasattr(obj, 'color') or obj.color is None:
-            obj.color = Qt.black  # Or any other default color
+        # Ensure color is properly maintained
+        if hasattr(self, 'current_color') and self.current_color:
+            obj.color = self.current_color
+        elif not hasattr(obj, 'color') or obj.color is None:
+            obj.color = Qt.black
         
         self.__viewport.objects.append(obj)
         obj.draw(self.__viewport)
