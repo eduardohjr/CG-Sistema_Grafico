@@ -1,6 +1,6 @@
 from graphicObject import Point, Line, Polygon
 from PyQt5.QtGui import QStandardItem
-from PyQt5.QtWidgets import QInputDialog, QMessageBox, QWidget, QVBoxLayout, QTabBar, QLabel, QLineEdit, QComboBox, QStackedWidget, QPushButton
+from PyQt5.QtWidgets import QInputDialog, QMessageBox, QWidget, QVBoxLayout, QTabBar, QLabel, QLineEdit, QColorDialog, QStackedWidget, QPushButton
 from PyQt5.QtCore import Qt
 from constants import *
 from descriptorOBJ import DescriptorOBJ
@@ -16,6 +16,7 @@ class Controller():
         self.zoomIn_mutiplier = 1.1
         self.zoomOut_multiplier = 0.9
         self.treeIndex = 0
+        self.color = None
         self.normalizedInfos = {UP: [[0,self.move_multiplier], [1,1], 0],
                                 DOWN: [[0,-self.move_multiplier], [1,1],0],
                                 LEFT: [[-self.move_multiplier,0], [1,1],0],
@@ -40,6 +41,9 @@ class Controller():
                 object = Polygon(self.__viewport.coordenates.copy())
 
             self.__viewport.objects.append(object)
+            self.color = QColorDialog().getColor()
+            object.color = self.color
+
             object.draw(self.__viewport)
 
             self.addTree(object)

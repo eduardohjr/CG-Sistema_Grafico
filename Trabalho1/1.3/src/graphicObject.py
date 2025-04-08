@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from PyQt5.QtGui import QBrush, QPen
 
 class GraphicObjectt(ABC):
     @abstractmethod
@@ -7,6 +8,7 @@ class GraphicObjectt(ABC):
         self.id = None
         self.points = []
         self.center = None
+        self.color = None
 
     def getId(self):
         return self.id
@@ -42,7 +44,7 @@ class Point(GraphicObjectt):
         self.center = self.calculateCenter()
 
     def draw(self, viewport):
-        self.id = viewport.scene().addEllipse(self.points[0][0], self.points[0][1], 5,5, viewport.pen, viewport.blackBurh)
+        self.id = viewport.scene().addEllipse(self.points[0][0], self.points[0][1], 5,5, QPen(self.color), QBrush(self.color))
         
 
     def translation(self, directions, viewport):
@@ -182,7 +184,7 @@ class Line(GraphicObjectt):
         self.center = self.calculateCenter()
         
     def draw(self, viewport):
-        self.id = viewport.scene().addLine(self.points[0][0], self.points[0][1], self.points[1][0], self.points[1][1])
+        self.id = viewport.scene().addLine(self.points[0][0], self.points[0][1], self.points[1][0], self.points[1][1], QPen(self.color))
     
     def translation(self, directions, viewport):
         new_points = []
@@ -324,7 +326,7 @@ class Polygon(GraphicObjectt):
         size = len(points)
         self.id = []
         for i in range(size):
-            self.id.append(viewport.scene().addLine(points[i%size][0], points[i%size][1], points[(i+1)%size][0], points[(i+1)%size][1]))
+            self.id.append(viewport.scene().addLine(points[i%size][0], points[i%size][1], points[(i+1)%size][0], points[(i+1)%size][1], QPen(self.color)))
 
     def translation(self, directions, viewport):
         new_points = []

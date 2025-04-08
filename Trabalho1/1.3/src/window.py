@@ -107,7 +107,8 @@ class Window(QMainWindow):
         load_obj = QPushButton(self)
         load_obj.setText("Load.OBJ")
         load_obj.setGeometry(190, 480, (BUTTON_WIDTH*2), BUTTON_HEIGHT)
-        load_obj.clicked.connect(self.loadFromObj) 
+        load_obj.clicked.connect(self.loadFromObj)
+
 
     def mousePressEvent(self, event):
         self.tree.clearSelection()
