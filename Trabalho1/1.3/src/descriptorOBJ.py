@@ -1,10 +1,11 @@
 class DescriptorOBJ:
-    def __init__(self, name, obj_type):
+    def __init__(self, name, obj_type, color=None):
         self.name = name
         self.type = obj_type
         self.vertices = []
         self.edges = []
-
+        self.color = color
+        
     def add_vertex(self, x, y, z=0):
         self.vertices.append((x, y, z))
 
@@ -19,6 +20,9 @@ class DescriptorOBJ:
     def write_to_file(self, file):
         file.write(f"o {self.name}\n")
         file.write(f"# Type: {self.type}\n")
+        
+        if self.color:
+            file.write(f"usemtl color_{self.color.rgb()}\n")
         
         for v in self.vertices:
             file.write(f"v {v[0]:.6f} {v[1]:.6f} {v[2]:.6f}\n")
