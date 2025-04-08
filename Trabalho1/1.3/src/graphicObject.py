@@ -40,8 +40,10 @@ class GraphicObjectt(ABC):
 
 class Point(GraphicObjectt):
     def __init__(self, points):
+        super().__init__(points)
         self.points = points
         self.center = self.calculateCenter()
+        self.color = None
 
     def draw(self, viewport):
         self.id = viewport.scene().addEllipse(self.points[0][0], self.points[0][1], 5,5, QPen(self.color), QBrush(self.color))
@@ -180,8 +182,10 @@ class Point(GraphicObjectt):
 
 class Line(GraphicObjectt):
     def __init__(self, points):
+        super().__init__(points)
         self.points = points
         self.center = self.calculateCenter()
+        self.color = None
         
     def draw(self, viewport):
         self.id = viewport.scene().addLine(self.points[0][0], self.points[0][1], self.points[1][0], self.points[1][1], QPen(self.color))
@@ -318,8 +322,10 @@ class Line(GraphicObjectt):
 
 class Polygon(GraphicObjectt):
     def __init__(self, points):
+        super().__init__(points)
         self.points = points
         self.center = self.calculateCenter()
+        self.color = None
         
     def draw(self, viewport):
         points = self.points

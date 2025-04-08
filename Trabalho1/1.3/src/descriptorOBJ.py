@@ -5,7 +5,7 @@ class DescriptorOBJ:
         self.vertices = []
         self.edges = []
         self.color = color
-        
+
     def add_vertex(self, x, y, z=0):
         self.vertices.append((x, y, z))
 
@@ -21,8 +21,9 @@ class DescriptorOBJ:
         file.write(f"o {self.name}\n")
         file.write(f"# Type: {self.type}\n")
         
-        if self.color:
-            file.write(f"usemtl color_{self.color.rgb()}\n")
+        if self.color and hasattr(self.color, 'getRgb'):
+            r, g, b, _ = self.color.getRgb()
+            file.write(f"usemtl {r}_{g}_{b}\n")
         
         for v in self.vertices:
             file.write(f"v {v[0]:.6f} {v[1]:.6f} {v[2]:.6f}\n")

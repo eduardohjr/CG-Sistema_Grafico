@@ -1,5 +1,5 @@
 from graphicObject import Point, Line, Polygon
-from PyQt5.QtGui import QStandardItem
+from PyQt5.QtGui import QStandardItem, QColor
 from PyQt5.QtWidgets import QInputDialog, QMessageBox, QWidget, QVBoxLayout, QTabBar, QLabel, QLineEdit, QColorDialog, QStackedWidget, QPushButton
 from PyQt5.QtCore import Qt
 from constants import *
@@ -306,18 +306,21 @@ class Controller():
             mtl_file.write("# Material file\n")
             if index is not None:
                 obj = self.__viewport.objects[index]
-                if obj.color:
+                if obj.color and hasattr(obj.color, 'getRgb'):
                     r, g, b, _ = obj.color.getRgb()
-                    mtl_file.write(f"newmtl color_{obj.color.rgb()}\n")
+                    color_key = f"{r}_{g}_{b}"
+                    mtl_file.write(f"newmtl {color_key}\n")  # Remove 'color_' prefix
                     mtl_file.write(f"Kd {r/255:.3f} {g/255:.3f} {b/255:.3f}\n")
             else:
                 color_set = set()
                 for obj in self.__viewport.objects:
-                    if obj.color and obj.color.rgb() not in color_set:
-                        color_set.add(obj.color.rgb())
+                    if obj.color and hasattr(obj.color, 'getRgb'):
                         r, g, b, _ = obj.color.getRgb()
-                        mtl_file.write(f"newmtl color_{obj.color.rgb()}\n")
-                        mtl_file.write(f"Kd {r/255:.3f} {g/255:.3f} {b/255:.3f}\n")
+                        color_key = f"{r}_{g}_{b}"
+                        if color_key not in color_set:
+                            color_set.add(color_key)
+                            mtl_file.write(f"newmtl {color_key}\n")  # Remove 'color_' prefix
+                            mtl_file.write(f"Kd {r/255:.3f} {g/255:.3f} {b/255:.3f}\n")
 
         with open(filename, 'w') as file:
             file.write("# Wavefront OBJ file\n")
@@ -373,14 +376,17 @@ class Controller():
                     current_mtl = None
                     for line in mtl_file:
                         line = line.strip()
-                        if line.startswith('newmtl color_'):
-                            current_mtl = int(line.split('_')[1])
+                        if line.startswith('newmtl '):
+                            current_mtl = line[7:]  # Get the material name after 'newmtl '
                         elif line.startswith('Kd') and current_mtl:
-                            parts = line.split()
-                            r = int(float(parts[1]) * 255)
-                            g = int(float(parts[2]) * 255)
-                            b = int(float(parts[3]) * 255)
-                            colors[current_mtl] = (r, g, b)
+                            try:
+                                parts = line.split()
+                                r = float(parts[1]) * 255
+                                g = float(parts[2]) * 255
+                                b = float(parts[3]) * 255
+                                colors[current_mtl] = QColor(int(r), int(g), int(b))
+                            except (IndexError, ValueError):
+                                continue
             except FileNotFoundError:
                 pass
                 
@@ -413,9 +419,9 @@ class Controller():
                         except (IndexError, ValueError):
                             continue
                     
-                    elif parts[0] == 'usemtl' and parts[1].startswith('color_'):
+                    elif parts[0] == 'usemtl':
                         try:
-                            color_key = int(parts[1].split('_')[1])
+                            color_key = parts[1]
                             if color_key in colors:
                                 current_color = colors[color_key]
                         except (IndexError, ValueError):
@@ -435,7 +441,9 @@ class Controller():
                     if current_color and obj:
                         obj.color = current_color
                         obj.draw(self.__viewport)
-                    
+                        
+            self.__viewport.update()
+                        
         except Exception as e:
             msg = QMessageBox()
             msg.setWindowTitle("Error")
@@ -460,6 +468,10 @@ class Controller():
             obj = Line(points)
         else:
             obj = Polygon(points)
+        
+        # Set default color if none exists
+        if not hasattr(obj, 'color') or obj.color is None:
+            obj.color = Qt.black  # Or any other default color
         
         self.__viewport.objects.append(obj)
         obj.draw(self.__viewport)
