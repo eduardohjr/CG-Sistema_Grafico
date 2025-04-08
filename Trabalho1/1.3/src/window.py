@@ -1,5 +1,6 @@
 
-from PyQt5.QtWidgets import QMainWindow, QPushButton
+from pickle import load
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QFileDialog
 from constants import *
 from viewport import View
 from controller import Controller
@@ -93,15 +94,49 @@ class Window(QMainWindow):
         rotate_window_left.setIcon(QtGui.QIcon("../icon/rotateIconLeft.png"))
         rotate_window_left.clicked.connect(lambda: self.controller.rotateWindowLeft(self.normalizedWindow))
         
-
         rotate_window_right = QPushButton(self)
         rotate_window_right.setGeometry(390, 340, (BUTTON_WIDTH), BUTTON_HEIGHT)
         rotate_window_right.setIcon(QtGui.QIcon("../icon/rotateIconRight.png"))
         rotate_window_right.clicked.connect(lambda: self.controller.rotateWindowRight(self.normalizedWindow))
 
+        save_obj = QPushButton(self)
+        save_obj.setText("Save .OBJ")
+        save_obj.setGeometry(60, 480, (BUTTON_WIDTH*2), BUTTON_HEIGHT)
+        save_obj.clicked.connect(self.saveToObj)
+
+        load_obj = QPushButton(self)
+        load_obj.setText("Load.OBJ")
+        load_obj.setGeometry(190, 480, (BUTTON_WIDTH*2), BUTTON_HEIGHT)
+        load_obj.clicked.connect(self.loadFromObj) 
+
     def mousePressEvent(self, event):
         self.tree.clearSelection()
         self.tree.clearFocus()
-        
+    
+    def saveToObj(self):
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            "Salvar Arquivo OBJ",
+            "",
+            "Arquivos OBJ (*.obj);;Todos os arquivos (*)"
+        )
+        if filename:
+            if not filename.endswith('.obj'):
+                filename += '.obj'
+            
+            if self.tree.selectedIndexes():
+                index = self.tree.selectedIndexes()[0].row()
+                self.controller.saveToObj(filename, index)
+            else:
+                self.controller.saveToObj(filename)
 
+    def loadFromObj(self):
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            "Abrir Arquivo OBJ",
+            "",
+            "Arquivos OBJ (*.obj);;Todos os arquivos (*)"
+        )
+        if filename:
+            self.controller.loadFromObj(filename)
         
