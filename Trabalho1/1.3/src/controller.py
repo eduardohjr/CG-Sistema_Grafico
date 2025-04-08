@@ -393,7 +393,7 @@ class Controller():
             with open(filename, 'r') as file:
                 current_vertices = []
                 current_edges = []
-                self.current_color = None  # Track current color at instance level
+                self.current_color = None
                 
                 for line in file:
                     line = line.strip()
@@ -423,7 +423,7 @@ class Controller():
                         try:
                             color_key = parts[1]
                             if color_key in colors:
-                                self.current_color = colors[color_key]  # Update instance color
+                                self.current_color = colors[color_key]
                         except (IndexError, ValueError):
                             continue
                     
@@ -431,7 +431,7 @@ class Controller():
                         obj = self._create_object_from_data(current_vertices, current_edges)
                         current_vertices = []
                         current_edges = []
-                        self.current_color = None  # Reset color after object creation
+                        self.current_color = None
                         
                 if current_vertices:
                     obj = self._create_object_from_data(current_vertices, current_edges)
@@ -444,7 +444,7 @@ class Controller():
             msg.setText(f"Failed to load file: {str(e)}")
             msg.setIcon(QMessageBox.Warning)
             msg.exec_()
-            
+
     def _create_object_from_data(self, vertices, edges):
         points = []
         if edges:
@@ -463,7 +463,6 @@ class Controller():
         else:
             obj = Polygon(points)
         
-        # Ensure color is properly maintained
         if hasattr(self, 'current_color') and self.current_color:
             obj.color = self.current_color
         elif not hasattr(obj, 'color') or obj.color is None:
