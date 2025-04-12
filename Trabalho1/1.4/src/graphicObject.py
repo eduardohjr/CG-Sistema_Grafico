@@ -7,6 +7,7 @@ class GraphicObjectt(ABC):
     def __init__(self, points):
         self.id = None
         self.points = []
+        self.draw_points = []
         self.center = None
         self.color = None
         self.on_screen = True
@@ -179,11 +180,12 @@ class Line(GraphicObjectt):
         self.points = points
         self.center = self.calculateCenter()
         self.color = None
+        self.draw_points = points
         
     def draw(self, viewport):
-        self.id = viewport.scene().addLine(self.points[0][0], self.points[0][1], self.points[1][0], self.points[1][1], QPen(self.color))
+        self.id = viewport.scene().addLine(self.draw_points[0][0], self.draw_points[0][1], self.draw_points[1][0], self.draw_points[1][1], QPen(self.color))
     
-    def translation(self, directions, viewport):
+    def translation(self, directions):
         new_points = []
         for coordenate in self.points:
             translation_matrix = [
@@ -198,7 +200,7 @@ class Line(GraphicObjectt):
             self.id.moveBy((new_points[i][0] - self.points[i][0]), (new_points[i][1] - self.points[i][1]))
         self.points = new_points   
 
-    def escalonation(self, scale, viewport):
+    def escalonation(self, scale):
         new_points = []
         for coordenate in self.points:
             first_translation_matrix = [
@@ -224,10 +226,8 @@ class Line(GraphicObjectt):
             new_points.append(result)
 
         self.points = new_points
-        viewport.scene().removeItem(self.id)
-        self.draw(viewport)
 
-    def rotationWord(self, angle, viewport):
+    def rotationWord(self, angle):
         angle = (np.radians(angle))
 
         new_points = []
@@ -242,10 +242,9 @@ class Line(GraphicObjectt):
             new_points.append(result)
 
         self.points = new_points
-        viewport.scene().removeItem(self.id)
-        self.draw(viewport)
 
-    def rotationPoint(self, angle, point, viewport):
+
+    def rotationPoint(self, angle, point):
         angle = (np.radians(angle))
 
         new_points = []
@@ -276,10 +275,9 @@ class Line(GraphicObjectt):
             new_points.append(result)
 
         self.points = new_points
-        viewport.scene().removeItem(self.id)
-        self.draw(viewport)
 
-    def rotationCenter(self, angle, viewport):
+
+    def rotationCenter(self, angle):
         angle = (np.radians(angle))
 
         new_points = []
@@ -310,8 +308,6 @@ class Line(GraphicObjectt):
             new_points.append(result)
 
         self.points = new_points
-        viewport.scene().removeItem(self.id)
-        self.draw(viewport)
 
 class Polygon(GraphicObjectt):
     def __init__(self, points):

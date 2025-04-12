@@ -124,6 +124,8 @@ class Controller():
 
             if (isinstance(graphicObject, Point)):
                 window.normalizedWindow.clipping.pointClippingCheck(graphicObject)
+            elif (isinstance(graphicObject, Line)):
+                graphicObject.draw_points = window.normalizedWindow.clipping.lineClipping(graphicObject)
 
             if (graphicObject.on_screen):
                 graphicObject.draw(self.__viewport)
@@ -138,13 +140,15 @@ class Controller():
             prevoious_on_screen = graphicObject.on_screen
 
             input = self.takeInputs(window)
-            graphicObject.escalonation(input, self.__viewport)
+            graphicObject.escalonation(input)
 
             if (prevoious_on_screen):
                 self.__scene.removeItem(graphicObject.id)
 
             if (isinstance (graphicObject, Point)):
                 window.normalizedWindow.clipping.pointClippingCheck(graphicObject)
+            elif (isinstance(graphicObject, Line)):
+                graphicObject.draw_points = window.normalizedWindow.clipping.lineClipping(graphicObject)
 
             if (graphicObject.on_screen):
                 graphicObject.draw(self.__viewport)
@@ -230,7 +234,7 @@ class Controller():
         self.angle_input2 = QLineEdit()
         self.angle_input2.setPlaceholderText("Enter the angle here...")
         execute_button = QPushButton("Execute")
-        execute_button.clicked.connect(lambda: self.executeRotCenter(graphicObject, index))
+        execute_button.clicked.connect(lambda: self.executeRotCenter(graphicObject, index, window))
         tab2_layout.addWidget(helper_text)
         tab2_layout.addWidget(self.angle_input2)
         tab2_layout.addWidget(execute_button)
@@ -258,14 +262,18 @@ class Controller():
         angle = self.angle_input.text()
         previous_on_screen = object.on_screen
         try:
-            object.rotationWord(float(angle), self.__viewport)
+            object.rotationWord(float(angle))
             self.updateObject(object, index)
             self.dialog.close()
 
             if(previous_on_screen):
                 self.__scene.removeItem(object.id)
+
             if (isinstance(object, Point)):
                 window.clipping.pointClippingCheck(object)
+            elif (isinstance(object,Line)):
+                object.draw_points = window.clipping.lineClipping(object)
+
             if (object.on_screen):
                 object.draw(self.__viewport)
 
@@ -273,14 +281,23 @@ class Controller():
             self.instructionsPopUp()
             return
 
-    def executeRotCenter(self, object, index):
+    def executeRotCenter(self, object, index, window):
         angle = self.angle_input2.text()
+        previous_on_screen = object.on_screen
         try:
-            object.rotationCenter(float(angle), self.__viewport)
+            object.rotationCenter(float(angle))
             self.updateObject(object, index)
             self.dialog.close()
-            self.__scene.removeItem(object.id)
-            object.draw(self.__viewport)
+            if(previous_on_screen):
+                self.__scene.removeItem(object.id)
+
+            if (isinstance(object, Point)):
+                window.clipping.pointClippingCheck(object)
+            elif (isinstance(object,Line)):
+                object.draw_points = window.clipping.lineClipping(object)
+
+            if (object.on_screen):
+                object.draw(self.__viewport)
         except:
             self.instructionsPopUp()
 
@@ -292,14 +309,19 @@ class Controller():
             angle = inputs[2]
             points = [inputs[i] for i in range(0,2)]
             if (len(inputs) == 3):
-                object.rotationPoint(angle, points, self.__viewport)
+                object.rotationPoint(angle, points)
                 self.updateObject(object, index)
                 self.dialog.close()
 
                 if(previous_on_screen):
                     self.__scene.removeItem(object.id)
+
                 if (isinstance(object, Point)):
                     window.clipping.pointClippingCheck(object)
+                elif (isinstance(object,Line)):
+                    object.draw_points = window.clipping.lineClipping(object)
+
+
                 if (object.on_screen):
                     object.draw(self.__viewport)
 

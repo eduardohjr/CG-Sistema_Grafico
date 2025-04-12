@@ -54,11 +54,15 @@ class NormalizedWindow:
             new_points.append(result)
 
             object.points = new_points.copy()
-        
-        if(isinstance(object, Point)):
+
+        if (isinstance(object, Point)):
             self.clipping.pointClippingCheck(object)
+        elif (isinstance(object, Line)):
+            object.draw_points = self.clipping.lineClipping(object)
+
 
         if (object.on_screen):
+            object.center = object.calculateCenter()
 
             if (isinstance(object, Polygon)):
                 for item in object.id:
