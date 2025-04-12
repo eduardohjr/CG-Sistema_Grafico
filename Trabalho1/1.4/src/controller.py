@@ -41,13 +41,20 @@ class Controller():
             else:
                 object = Polygon(self.__viewport.coordenates.copy())
 
-            window.clipping.pointClippingCheck(object)
+            if (isinstance(object, Point)):
+                window.clipping.pointClippingCheck(object)
+
+            if (isinstance(object, Line)):
+                    object.draw_points = window.clipping.lineClipping(object)
+ 
             if (object.on_screen):
                 self.__viewport.objects.append(object)
                 self.color = QColorDialog().getColor()
                 object.color = self.color
 
+
                 object.draw(self.__viewport)
+ 
 
                 self.addTree(object)
                 self.__viewport.coordenates.clear()

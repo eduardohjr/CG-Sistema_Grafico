@@ -83,7 +83,7 @@ class Clipping():
                     if x != None:
                         if not (self.minX < x < self.maxX):
                             if y == None:
-                                object.clipped = True
+                                object.on_screen = False
                                 new_points[index][1] = points[index][1]
                                 break
                         else:
@@ -92,7 +92,7 @@ class Clipping():
                     if y != None:
                         if not (self.minY< y < self.maxY):
                             if x == None:
-                                object.clipped = True
+                                object.on_screen = False
                                 new_points[index][0] = points[index][0]
                                 break
                         else:
