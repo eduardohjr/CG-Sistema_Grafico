@@ -9,19 +9,19 @@ class RadioButton(QWidget):
         self.setFixedSize(230,50)
         self.setWindowTitle("Clipping Slect")
 
-    def createClippingOptions(self, clipping):
+    def createClippingOptions(self, clipping, line_edit):
         radiobutton = QRadioButton("CS")
-        radiobutton.setChecked(True)
         radiobutton.selected = "CS"
-        radiobutton.toggled.connect(lambda: self.onClicked(clipping))
+        radiobutton.toggled.connect(lambda: self.onClicked(clipping, line_edit))
         self.radioLayout.addWidget(radiobutton, 0, 0)
 
         radiobutton = QRadioButton("LB")
         radiobutton.selected = "LB"
-        radiobutton.toggled.connect(lambda: self.onClicked(clipping))
+        radiobutton.toggled.connect(lambda: self.onClicked(clipping, line_edit))
         self.radioLayout.addWidget(radiobutton, 0, 1)
 
-    def onClicked(self, clipping):
+    def onClicked(self, clipping, line_edit):
         radioButton = self.sender()
         if radioButton.isChecked():
             clipping.lineClippingType = radioButton.selected
+            line_edit.setText(radioButton.selected)

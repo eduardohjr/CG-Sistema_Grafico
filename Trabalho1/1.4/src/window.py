@@ -1,11 +1,11 @@
 
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QFileDialog, QLineEdit
 from constants import *
 from viewport import View
 from controller import Controller
 from treeView import Tree
 from normalizedWindow import NormalizedWindow
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtCore
 from radioButton import RadioButton
 
 
@@ -31,7 +31,13 @@ class Window(QMainWindow):
         self.normalizedWindow = NormalizedWindow(self.viewport)
         self.normalizedWindow.delimiteViewport()
 
+        self.line_edit = QLineEdit(self.normalizedWindow.clipping.lineClippingType, parent=self)
+        self.line_edit.setReadOnly(True)
+        self.line_edit.setAlignment(QtCore.Qt.AlignCenter)
+        self.line_edit.setGeometry(330,40, (BUTTON_WIDTH*2), 20)
+
         self.radioButton = RadioButton()
+
 
         self.show()
 
@@ -119,19 +125,10 @@ class Window(QMainWindow):
         select_clipping.setGeometry(330, 10, (BUTTON_WIDTH*2), BUTTON_HEIGHT)
         select_clipping.clicked.connect(self.showClippingRadioButton)
 
-
-        teste = QPushButton(self)
-        teste.setText("TESTE")
-        teste.setGeometry(60, 580, BUTTON_WIDTH, BUTTON_HEIGHT)
-        teste.clicked.connect(self.teste)
-
-
-    def teste(self):
-       print(self.normalizedWindow.clipping.lineClippingType)
-
     def mousePressEvent(self, event):
         self.tree.clearSelection()
         self.tree.clearFocus()
+        self.line_edit.clearFocus()
     
     def saveToObj(self):
         filename, _ = QFileDialog.getSaveFileName(
@@ -161,7 +158,7 @@ class Window(QMainWindow):
             self.controller.loadFromObj(filename)
 
     def showClippingRadioButton(self):
-        self.radioButton.createClippingOptions(self.normalizedWindow.clipping)
+        self.radioButton.createClippingOptions(self.normalizedWindow.clipping, self.line_edit)
         self.radioButton.show()
 
 

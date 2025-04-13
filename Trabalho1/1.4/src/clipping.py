@@ -16,11 +16,11 @@ class Clipping():
         else :
             object.on_screen = True
 
-    def lineClipping(self, Gobject):
+    def lineClipping(self, object):
         if self.lineClippingType == "CS":
-            return self.CsClipping(Gobject)
+            return self.CsClipping(object)
         else:
-            pass
+            return self.LbClipping(object)
 
 
     def CsClipping(self, object):
@@ -97,5 +97,54 @@ class Clipping():
                                 break
                         else:
                             new_points[index][1] = y
+
+        return new_points
+    
+    def LbClipping(self, object):
+        points = object.points
+
+        p = [None] * 4
+        q = [None] * 4
+        zeta = [None] * 2
+        r = [[], []]
+        
+        new_points = [[points[0][0], points[0][1]], [points[1][0], points[1][1]]]
+        object.on_screen = True
+        
+        p[0] = -(points[1][0] - points[0][0])
+        p[1] = points[1][0] - points[0][0]
+        p[2] = -(points[1][1] - points[0][1])
+        p[3] = points[1][1] - points[0][1]
+
+        q[0] = points[0][0] - self.minX
+        q[1] = self.maxX - points[0][0]
+        q[2] = points[0][1] - self.minY
+        q[3] = self.maxY - points[0][1]
+
+        for i, element in enumerate(p):
+            if element == 0:
+                if q[i] < 0:
+                    object.on_screen = False
+                else:
+                    return new_points
+            elif element < 0:
+                r[0].append(q[i] / element)
+            else:
+                r[1].append(q[i] / element)
+
+        if object.on_screen:
+            zeta[0] = max(0, r[0][0], r[0][1])
+            zeta[1] = min(1, r[1][0], r[1][1])
+
+            if zeta[0] > zeta[1]:
+                object.on_screen = False
+            else:
+                if zeta[0] != 0:
+                    new_points[0][0] = points[0][0] + (zeta[0] * p[1])
+                    new_points[0][1] = points[0][1] + (zeta[0] * p[3])
+
+                if zeta[1] != 1:
+                    new_points[1][0] = points[0][0] + (zeta[1] * p[1])
+                    new_points[1][1] = points[0][1] + (zeta[1] * p[3])
 
         return new_points
