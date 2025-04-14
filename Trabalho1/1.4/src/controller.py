@@ -45,7 +45,7 @@ class Controller():
                 window.clipping.pointClippingCheck(object)
             elif (isinstance(object, Line)):
                 object.draw_points = window.clipping.lineClipping(object)
-            elif (isinstance(object, Polygon)):  # Add this condition
+            elif (isinstance(object, Polygon)):
                 object.applyClipping(window.clipping)
 
             if (object.on_screen):

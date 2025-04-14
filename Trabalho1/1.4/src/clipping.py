@@ -173,10 +173,10 @@ class Clipping():
                 )
 
             edges = [
-                (self.minX, self.minY, self.maxX, self.minY),  # bottom
-                (self.maxX, self.minY, self.maxX, self.maxY),  # right
-                (self.maxX, self.maxY, self.minX, self.maxY),  # top
-                (self.minX, self.maxY, self.minX, self.minY)   # left
+                (self.minX, self.minY, self.maxX, self.minY),
+                (self.maxX, self.minY, self.maxX, self.maxY),
+                (self.maxX, self.maxY, self.minX, self.maxY),
+                (self.minX, self.maxY, self.minX, self.minY)
             ]
             
             output_polygon = subject_polygon
