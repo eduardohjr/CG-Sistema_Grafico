@@ -1,10 +1,11 @@
 class DescriptorOBJ:
-    def __init__(self, name, obj_type, color=None):
+    def __init__(self, name, obj_type, color=None, filled=False):
         self.name = name
         self.type = obj_type
         self.vertices = []
         self.edges = []
         self.color = color
+        self.filled = filled
 
     def add_vertex(self, x, y, z=0):
         self.vertices.append((x, y, z))

@@ -28,7 +28,7 @@ class Controller():
                                 }
 
 
-    def drawEvent(self, window):
+    def drawEvent(self, window, filled = False):
         if (self.__viewport.coordenates):
             self.clearText()
 
@@ -39,23 +39,20 @@ class Controller():
             elif (len(self.__viewport.coordenates) == 2):
                 object = Line(self.__viewport.coordenates.copy())
             else:
-                object = Polygon(self.__viewport.coordenates.copy())
+                object = Polygon(self.__viewport.coordenates.copy(), filled)
 
             if (isinstance(object, Point)):
                 window.clipping.pointClippingCheck(object)
+            elif (isinstance(object, Line)):
+                object.draw_points = window.clipping.lineClipping(object)
+            elif (isinstance(object, Polygon)):  # Add this condition
+                object.applyClipping(window.clipping)
 
-            if (isinstance(object, Line)):
-                    object.draw_points = window.clipping.lineClipping(object)
- 
             if (object.on_screen):
                 self.__viewport.objects.append(object)
                 self.color = QColorDialog().getColor()
                 object.color = self.color
-
-
                 object.draw(self.__viewport)
- 
-
                 self.addTree(object)
                 self.__viewport.coordenates.clear()
             else:

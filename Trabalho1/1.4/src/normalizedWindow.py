@@ -51,15 +51,16 @@ class NormalizedWindow:
         for coordinates in object.getPoints():
             points_matrix = [coordinates[0], coordinates[1], 1]
             result = self.calculate_transformation(points_matrix, infos)
-            new_points.append(result)
+            new_points.append([result[0], result[1]])
 
-            object.points = new_points.copy()
+        object.points = new_points.copy()
 
         if (isinstance(object, Point)):
             self.clipping.pointClippingCheck(object)
         elif (isinstance(object, Line)):
             object.draw_points = self.clipping.lineClipping(object)
-
+        elif (isinstance(object, Polygon)):
+            object.applyClipping(self.clipping)
 
         if (object.on_screen):
             object.center = object.calculateCenter()
@@ -76,7 +77,11 @@ class NormalizedWindow:
 
         else:
             if (previous_on_screen):
-                self.viewport.scene().removeItem(object.id)
+                if isinstance(object, Polygon):
+                    for item in object.id:
+                        self.viewport.scene().removeItem(item)
+                else:
+                    self.viewport.scene().removeItem(object.id)
 
 
     def delimiteViewport(self):

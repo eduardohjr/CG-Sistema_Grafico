@@ -1,5 +1,4 @@
-
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QFileDialog, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QPushButton, QFileDialog, QLineEdit, QCheckBox
 from constants import *
 from viewport import View
 from controller import Controller
@@ -75,10 +74,16 @@ class Window(QMainWindow):
         zoom_out.setGeometry(230,360,BUTTON_WIDTH,BUTTON_HEIGHT)
         zoom_out.clicked.connect(lambda: self.controller.zoomOutEvent(self.normalizedWindow))
         
+        self.filled_checkbox = QCheckBox("Filled Polygon", self)
+        self.filled_checkbox.setGeometry(30, 45, 120, 20)
+
         draw = QPushButton(self)
         draw.setText("Draw")
         draw.setGeometry(30,10,(BUTTON_WIDTH*2), BUTTON_HEIGHT)
-        draw.clicked.connect(lambda: self.controller.drawEvent(self.normalizedWindow))
+        draw.clicked.connect(lambda: self.controller.drawEvent(
+            self.normalizedWindow, 
+            self.filled_checkbox.isChecked()
+        ))
 
         clear = QPushButton(self)
         clear.setText("Clear")
@@ -124,6 +129,7 @@ class Window(QMainWindow):
         select_clipping.setText("Select Clipping")
         select_clipping.setGeometry(330, 10, (BUTTON_WIDTH*2), BUTTON_HEIGHT)
         select_clipping.clicked.connect(self.showClippingRadioButton)
+
 
     def mousePressEvent(self, event):
         self.tree.clearSelection()

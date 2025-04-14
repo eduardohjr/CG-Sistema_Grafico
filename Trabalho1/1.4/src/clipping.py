@@ -148,3 +148,62 @@ class Clipping():
                     new_points[1][1] = points[0][1] + (zeta[1] * p[3])
 
         return new_points
+
+    def polygonClipping(self, polygon):
+        # Sutherland-Hodgman algorithm for polygon clipping
+        def clip(subject_polygon, clip_polygon):
+            def inside(p, edge):
+                x, y = p
+                x1, y1, x2, y2 = edge
+                return (x2 - x1) * (y - y1) > (y2 - y1) * (x - x1)
+
+            def compute_intersection(p1, p2, edge):
+                x1, y1 = p1
+                x2, y2 = p2
+                x3, y3, x4, y4 = edge
+                
+                denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
+                if denom == 0:
+                    return p1
+                    
+                ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom
+                return (
+                    x1 + ua * (x2 - x1),
+                    y1 + ua * (y2 - y1)
+                )
+
+            edges = [
+                (self.minX, self.minY, self.maxX, self.minY),  # bottom
+                (self.maxX, self.minY, self.maxX, self.maxY),  # right
+                (self.maxX, self.maxY, self.minX, self.maxY),  # top
+                (self.minX, self.maxY, self.minX, self.minY)   # left
+            ]
+            
+            output_polygon = subject_polygon
+            for edge in edges:
+                input_polygon = output_polygon
+                output_polygon = []
+                if not input_polygon:
+                    break
+                    
+                prev_point = input_polygon[-1]
+                for curr_point in input_polygon:
+                    if inside(curr_point, edge):
+                        if not inside(prev_point, edge):
+                            intersection = compute_intersection(prev_point, curr_point, edge)
+                            output_polygon.append(intersection)
+                        output_polygon.append(curr_point)
+                    elif inside(prev_point, edge):
+                        intersection = compute_intersection(prev_point, curr_point, edge)
+                        output_polygon.append(intersection)
+                    prev_point = curr_point
+            
+            return output_polygon
+
+        clipped_points = clip(polygon.points, [])
+        if not clipped_points:
+            polygon.on_screen = False
+            return []
+        
+        polygon.on_screen = True
+        return clipped_points

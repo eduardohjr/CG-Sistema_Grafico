@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 from PyQt5.QtGui import QBrush, QPen
+from PyQt5 import QtGui, QtCore
 
 class GraphicObjectt(ABC):
     @abstractmethod
@@ -310,18 +311,33 @@ class Line(GraphicObjectt):
         self.points = new_points
 
 class Polygon(GraphicObjectt):
-    def __init__(self, points):
+    def __init__(self, points, filled = False):
         super().__init__(points)
         self.points = points
         self.center = self.calculateCenter()
         self.color = None
+        self.filled = filled
+        self.clipped_points = points.copy()
         
     def draw(self, viewport):
-        points = self.points
+        points = self.clipped_points if hasattr(self, 'clipped_points') else self.points
         size = len(points)
         self.id = []
-        for i in range(size):
-            self.id.append(viewport.scene().addLine(points[i%size][0], points[i%size][1], points[(i+1)%size][0], points[(i+1)%size][1], QPen(self.color)))
+        if self.filled:
+            polygon = QtGui.QPolygonF()
+            for point in points:
+                polygon.append(QtCore.QPointF(point[0], point[1]))
+            self.id.append(viewport.scene().addPolygon(polygon, QPen(self.color), QBrush(self.color)))
+        else:
+            for i in range(size):
+                self.id.append(viewport.scene().addLine(
+                    points[i%size][0], points[i%size][1], 
+                    points[(i+1)%size][0], points[(i+1)%size][1], 
+                    QPen(self.color)))
+
+    def applyClipping(self, clipping):
+        self.clipped_points = clipping.polygonClipping(self)
+        return self.on_screen
 
     def translation(self, directions, viewport):
         new_points = []
