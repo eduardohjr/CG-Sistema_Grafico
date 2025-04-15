@@ -423,7 +423,7 @@ class Controller():
                 if obj.color and hasattr(obj.color, 'getRgb'):
                     r, g, b, _ = obj.color.getRgb()
                     color_key = f"{r}_{g}_{b}"
-                    mtl_file.write(f"newmtl {color_key}\n")  # Remove 'color_' prefix
+                    mtl_file.write(f"newmtl {color_key}\n")
                     mtl_file.write(f"Kd {r/255:.3f} {g/255:.3f} {b/255:.3f}\n")
             else:
                 color_set = set()
@@ -433,7 +433,7 @@ class Controller():
                         color_key = f"{r}_{g}_{b}"
                         if color_key not in color_set:
                             color_set.add(color_key)
-                            mtl_file.write(f"newmtl {color_key}\n")  # Remove 'color_' prefix
+                            mtl_file.write(f"newmtl {color_key}\n")
                             mtl_file.write(f"Kd {r/255:.3f} {g/255:.3f} {b/255:.3f}\n")
 
         with open(filename, 'w') as file:
@@ -447,7 +447,14 @@ class Controller():
                         "line" if len(obj.points) == 2 else \
                         "polygon"
                 
-                descritor = DescriptorOBJ(f"obj_{index}", obj_type, obj.color)
+                # Add fill status and clipping info for polygons
+                if obj_type == "polygon":
+                    fill_status = "filled" if obj.filled else "unfilled"
+                    clip_status = "clipped" if hasattr(obj, 'clipped_points') and obj.clipped_points != obj.points else "unclipped"
+                    file.write(f"# Fill: {fill_status}\n")
+                    file.write(f"# Clipping: {clip_status}\n")
+                
+                descritor = DescriptorOBJ(f"obj_{index}", obj_type, obj.color, getattr(obj, 'filled', False))
                 for point in obj.points:
                     descritor.add_vertex(point[0], point[1], 0)
                 
@@ -465,7 +472,14 @@ class Controller():
                             "line" if len(obj.points) == 2 else \
                             "polygon"
                     
-                    descritor = DescriptorOBJ(f"obj_{idx}", obj_type, obj.color)
+                    # Add fill status and clipping info for polygons
+                    if obj_type == "polygon":
+                        fill_status = "filled" if obj.filled else "unfilled"
+                        clip_status = "clipped" if hasattr(obj, 'clipped_points') and obj.clipped_points != obj.points else "unclipped"
+                        file.write(f"# Fill: {fill_status}\n")
+                        file.write(f"# Clipping: {clip_status}\n")
+                    
+                    descritor = DescriptorOBJ(f"obj_{idx}", obj_type, obj.color, getattr(obj, 'filled', False))
                     for point in obj.points:
                         descritor.add_vertex(point[0], point[1], 0)
                     
@@ -507,11 +521,17 @@ class Controller():
             with open(filename, 'r') as file:
                 current_vertices = []
                 current_edges = []
-                self.current_color = None  # Track current color at instance level
+                current_filled = False
+                self.current_color = None
+                window = self.__viewport.parent()
                 
                 for line in file:
                     line = line.strip()
                     if not line or line.startswith('#'):
+                        if line.startswith('# Fill: filled'):
+                            current_filled = True
+                        elif line.startswith('# Fill: unfilled'):
+                            current_filled = False
                         continue
                         
                     parts = line.split()
@@ -537,18 +557,46 @@ class Controller():
                         try:
                             color_key = parts[1]
                             if color_key in colors:
-                                self.current_color = colors[color_key]  # Update instance color
+                                self.current_color = colors[color_key]
                         except (IndexError, ValueError):
                             continue
                     
                     if (parts[0] == 'o' or not line) and current_vertices:
-                        obj = self._create_object_from_data(current_vertices, current_edges)
+                        obj = self._create_object_from_data(current_vertices, current_edges, current_filled)
+                        
+                        # Apply proper clipping based on object type
+                        if isinstance(obj, Point):
+                            window.normalizedWindow.clipping.pointClippingCheck(obj)
+                            if obj.on_screen:
+                                obj.draw(self.__viewport)
+                        elif isinstance(obj, Line):
+                            obj.draw_points = window.normalizedWindow.clipping.lineClipping(obj)
+                            if obj.on_screen:
+                                obj.draw(self.__viewport)
+                        elif isinstance(obj, Polygon):
+                            obj.applyClipping(window.normalizedWindow.clipping)
+                            if obj.on_screen:
+                                obj.draw(self.__viewport)
+                        
                         current_vertices = []
                         current_edges = []
-                        self.current_color = None  # Reset color after object creation
+                        current_filled = False
+                        self.current_color = None
                         
                 if current_vertices:
-                    obj = self._create_object_from_data(current_vertices, current_edges)
+                    obj = self._create_object_from_data(current_vertices, current_edges, current_filled)
+                    if isinstance(obj, Point):
+                        window.normalizedWindow.clipping.pointClippingCheck(obj)
+                        if obj.on_screen:
+                            obj.draw(self.__viewport)
+                    elif isinstance(obj, Line):
+                        obj.draw_points = window.normalizedWindow.clipping.lineClipping(obj)
+                        if obj.on_screen:
+                            obj.draw(self.__viewport)
+                    elif isinstance(obj, Polygon):
+                        obj.applyClipping(window.normalizedWindow.clipping)
+                        if obj.on_screen:
+                            obj.draw(self.__viewport)
                     
             self.__viewport.update()
                         
@@ -559,32 +607,18 @@ class Controller():
             msg.setIcon(QMessageBox.Warning)
             msg.exec_()
             
-    def _create_object_from_data(self, vertices, edges):
-        points = []
-        if edges:
-            unique_indices = set()
-            for e in edges:
-                unique_indices.add(e[0])
-                unique_indices.add(e[1])
-            points = [vertices[i] for i in unique_indices]
+    def _create_object_from_data(self, vertices, edges, filled=False):
+        if len(vertices) == 1:
+            obj = Point([vertices[0]])
+        elif len(vertices) == 2:
+            obj = Line([vertices[0], vertices[1]])
         else:
-            points = vertices
-        
-        if len(points) == 1:
-            obj = Point(points)
-        elif len(points) == 2:
-            obj = Line(points)
-        else:
-            obj = Polygon(points)
-        
-        # Ensure color is properly maintained
-        if hasattr(self, 'current_color') and self.current_color:
+            obj = Polygon(vertices, filled=filled)
+            
+        if self.current_color:
             obj.color = self.current_color
-        elif not hasattr(obj, 'color') or obj.color is None:
-            obj.color = Qt.black
-        
+            
         self.__viewport.objects.append(obj)
-        obj.draw(self.__viewport)
         self.addTree(obj)
         return obj
     
