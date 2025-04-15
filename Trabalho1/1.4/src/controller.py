@@ -70,12 +70,13 @@ class Controller():
             self.__viewport.coordenates.clear()
         else:
             for item in self.__viewport.objects:
-                if(isinstance(item, Polygon)):
-                    for id in item.id:
-                        self.__scene.removeItem(id)
-                else:
-                    if(item.on_screen):
+                if (item.on_screen):
+                    if(isinstance(item, Polygon)):
+                        for id in item.id:
+                            self.__scene.removeItem(id)
+                    else:
                         self.__scene.removeItem(item.id)
+                        
             self.clearText()
             self.__viewport.coordenates.clear()
             self.__viewport.objects.clear()
