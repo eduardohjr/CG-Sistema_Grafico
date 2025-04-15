@@ -339,7 +339,7 @@ class Polygon(GraphicObjectt):
         self.clipped_points = clipping.polygonClipping(self)
         return self.on_screen
 
-    def translation(self, directions, viewport):
+    def translation(self, directions):
         new_points = []
         for coordenate in self.points:
             translation_matrix = [
@@ -352,11 +352,7 @@ class Polygon(GraphicObjectt):
 
         self.points = new_points
 
-        for item in self.id:
-            viewport.scene().removeItem(item)
-        self.draw(viewport)
-
-    def escalonation(self, scale, viewport):
+    def escalonation(self, scale):
         new_points = []
         for coordenate in self.points:
             first_translation_matrix = [
@@ -383,11 +379,7 @@ class Polygon(GraphicObjectt):
 
         self.points = new_points
 
-        for item in self.id:
-            viewport.scene().removeItem(item)
-        self.draw(viewport)
-
-    def rotationWord(self, angle, viewport):
+    def rotationWord(self, angle):
         angle = (np.radians(float(angle)))
 
         new_points = []
@@ -402,9 +394,6 @@ class Polygon(GraphicObjectt):
             new_points.append(result)
 
         self.points = new_points
-        for item in self.id:
-            viewport.scene().removeItem(item)
-        self.draw(viewport)
 
     def rotationPoint(self, angle, point, viewport):
         angle = (np.radians(angle))
@@ -438,11 +427,8 @@ class Polygon(GraphicObjectt):
 
         self.points = new_points
 
-        for item in self.id:
-            viewport.scene().removeItem(item)
-        self.draw(viewport)
 
-    def rotationCenter(self, angle, viewport):
+    def rotationCenter(self, angle):
         angle = (np.radians(angle))
 
         new_points = []
@@ -473,10 +459,6 @@ class Polygon(GraphicObjectt):
             new_points.append(result)
 
         self.points = new_points
-
-        for item in self.id:
-            viewport.scene().removeItem(item)
-        self.draw(viewport)
 
     
         

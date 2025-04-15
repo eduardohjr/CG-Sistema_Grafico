@@ -124,12 +124,18 @@ class Controller():
             graphicObject.translation(input)
 
             if (previous_on_screen):
-                self.__scene.removeItem(graphicObject.id)
+                if (isinstance(graphicObject, Polygon)):
+                    for item in graphicObject.id:
+                        self.__scene.removeItem(item)
+                else:
+                    self.__scene.removeItem(graphicObject.id)
 
             if (isinstance(graphicObject, Point)):
                 window.normalizedWindow.clipping.pointClippingCheck(graphicObject)
             elif (isinstance(graphicObject, Line)):
                 graphicObject.draw_points = window.normalizedWindow.clipping.lineClipping(graphicObject)
+            elif (isinstance(graphicObject, Polygon)):
+                graphicObject.applyClipping(window.normalizedWindow.clipping)
 
             if (graphicObject.on_screen):
                 graphicObject.draw(self.__viewport)
@@ -141,13 +147,17 @@ class Controller():
             index = self.__tree.selectedIndexes()[0].row()
             graphicObject =self.__viewport.objects[index]
 
-            prevoious_on_screen = graphicObject.on_screen
+            previous_on_screen = graphicObject.on_screen
 
             input = self.takeInputs(window)
             graphicObject.escalonation(input)
 
-            if (prevoious_on_screen):
-                self.__scene.removeItem(graphicObject.id)
+            if (previous_on_screen):
+                if (isinstance(graphicObject, Polygon)):
+                    for item in graphicObject.id:
+                        self.__scene.removeItem(item)
+                else:
+                    self.__scene.removeItem(graphicObject.id)
 
             if (isinstance (graphicObject, Point)):
                 window.normalizedWindow.clipping.pointClippingCheck(graphicObject)
@@ -270,8 +280,12 @@ class Controller():
             self.updateObject(object, index)
             self.dialog.close()
 
-            if(previous_on_screen):
-                self.__scene.removeItem(object.id)
+            if (previous_on_screen):
+                if (isinstance(object, Polygon)):
+                    for item in object.id:
+                        self.__scene.removeItem(item)
+                else:
+                    self.__scene.removeItem(object.id)
 
             if (isinstance(object, Point)):
                 window.clipping.pointClippingCheck(object)
@@ -292,8 +306,13 @@ class Controller():
             object.rotationCenter(float(angle))
             self.updateObject(object, index)
             self.dialog.close()
-            if(previous_on_screen):
-                self.__scene.removeItem(object.id)
+
+            if (previous_on_screen):
+                if (isinstance(object, Polygon)):
+                    for item in object.id:
+                        self.__scene.removeItem(item)
+                else:
+                    self.__scene.removeItem(object.id)
 
             if (isinstance(object, Point)):
                 window.clipping.pointClippingCheck(object)
@@ -317,8 +336,13 @@ class Controller():
                 self.updateObject(object, index)
                 self.dialog.close()
 
-                if(previous_on_screen):
-                    self.__scene.removeItem(object.id)
+
+                if (previous_on_screen):
+                    if (isinstance(object, Polygon)):
+                        for item in object.id:
+                            self.__scene.removeItem(item)
+                    else:
+                        self.__scene.removeItem(object.id)
 
                 if (isinstance(object, Point)):
                     window.clipping.pointClippingCheck(object)
