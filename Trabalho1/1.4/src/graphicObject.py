@@ -395,7 +395,7 @@ class Polygon(GraphicObjectt):
 
         self.points = new_points
 
-    def rotationPoint(self, angle, point, viewport):
+    def rotationPoint(self, angle, point):
         angle = (np.radians(angle))
 
         new_points = []
