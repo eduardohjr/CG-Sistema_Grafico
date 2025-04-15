@@ -76,7 +76,7 @@ class Controller():
                             self.__scene.removeItem(id)
                     else:
                         self.__scene.removeItem(item.id)
-                        
+
             self.clearText()
             self.__viewport.coordenates.clear()
             self.__viewport.objects.clear()
@@ -164,6 +164,8 @@ class Controller():
                 window.normalizedWindow.clipping.pointClippingCheck(graphicObject)
             elif (isinstance(graphicObject, Line)):
                 graphicObject.draw_points = window.normalizedWindow.clipping.lineClipping(graphicObject)
+            elif (isinstance(graphicObject, Polygon)):
+                graphicObject.applyClipping(window.normalizedWindow.clipping)
 
             if (graphicObject.on_screen):
                 graphicObject.draw(self.__viewport)
@@ -292,6 +294,8 @@ class Controller():
                 window.clipping.pointClippingCheck(object)
             elif (isinstance(object,Line)):
                 object.draw_points = window.clipping.lineClipping(object)
+            elif (isinstance(object, Polygon)):
+                object.applyClipping(window.clipping)
 
             if (object.on_screen):
                 object.draw(self.__viewport)
@@ -319,6 +323,8 @@ class Controller():
                 window.clipping.pointClippingCheck(object)
             elif (isinstance(object,Line)):
                 object.draw_points = window.clipping.lineClipping(object)
+            elif (isinstance(object, Polygon)):
+                object.applyClipping(window.clipping)
 
             if (object.on_screen):
                 object.draw(self.__viewport)
@@ -349,6 +355,8 @@ class Controller():
                     window.clipping.pointClippingCheck(object)
                 elif (isinstance(object,Line)):
                     object.draw_points = window.clipping.lineClipping(object)
+                elif (isinstance(object, Polygon)):
+                    object.applyClipping(window.clipping)
 
 
                 if (object.on_screen):
