@@ -153,30 +153,31 @@ class Clipping():
         # Sutherland-Hodgman algorithm for polygon clipping
         def clip(subject_polygon, clip_polygon):
             def inside(p, edge):
-                try:
-                    x, y = p
-                except:
-                    x,y,z = p
+                # try:
+                #     x, y = p
+                # except:
+                #     x,y,z = p
                 x1, y1, x2, y2 = edge
-                return (x2 - x1) * (y - y1) > (y2 - y1) * (x - x1)
+                return (x2 - x1) * (p[1] - y1) > (y2 - y1) * (p[0] - x1)
 
             def compute_intersection(p1, p2, edge):
-                try:
-                    x1, y1 = p1
-                    x2, y2 = p2
-                except:
-                    x1, y1, z1 = p1
-                    x2, y2, z2 = p2
+                # try:
+                #     x1, y1 = p1
+                #     x2, y2 = p2
+                # except:
+                #     x1, y1, z1 = p1
+                #     x2, y2, z2 = p2
+
                 x3, y3, x4, y4 = edge
                 
-                denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
+                denom = (y4 - y3) * (p2[0] - p1[0]) - (x4 - x3) * (p2[1] - p1[1])
                 if denom == 0:
                     return p1
                     
-                ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom
+                ua = ((x4 - x3) * (p1[1] - y3) - (y4 - y3) * (p1[0] - x3)) / denom
                 return (
-                    x1 + ua * (x2 - x1),
-                    y1 + ua * (y2 - y1)
+                    p1[0] + ua * (p2[0] - p1[0]),
+                    p1[1] + ua * (p2[1] - p1[1])
                 )
 
             edges = [
