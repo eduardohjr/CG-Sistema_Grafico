@@ -467,7 +467,7 @@ class Controller():
             
             if index is not None:
                 obj = self.__viewport.objects[index]
-                obj_type = "point" if isinstance(obj, Point)else \
+                obj_type = "point" if isinstance(obj, Point) else \
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
                         "curve"
@@ -548,20 +548,33 @@ class Controller():
                 current_filled = False
                 self.current_color = None
                 window = self.__viewport.parent()
-                
+                obj_type = ''
+
                 for line in file:
                     line = line.strip()
-                    if not line or line.startswith('#'):
-                        if line.startswith('# Fill: filled'):
-                            current_filled = True
-                        elif line.startswith('# Fill: unfilled'):
-                            current_filled = False
+                    if not line:
                         continue
                         
+                    if line.startswith('#'):
+                        # Parse type and fill status from comments
+                        if 'Type: polygon' in line:
+                            obj_type = 'polygon'
+                        elif 'Type: curve' in line:
+                            obj_type = 'curve'
+                        elif 'Type: point' in line:
+                            obj_type = 'point'
+                        elif 'Type: line' in line:
+                            obj_type = 'line'
+                        elif 'Fill: filled' in line:
+                            current_filled = True
+                        elif 'Fill: unfilled' in line:
+                            current_filled = False
+                        continue
+
                     parts = line.split()
                     if len(parts) < 2:
                         continue
-                        
+                    
                     if parts[0] == 'v':
                         try:
                             x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
@@ -586,8 +599,10 @@ class Controller():
                             continue
                     
                     if (parts[0] == 'o' or not line) and current_vertices:
-                        obj = self._create_object_from_data(current_vertices, current_edges, current_filled)
-                        
+                        print(f"Creating object with type: {obj_type}")  # Debug print
+                        obj = self._create_object_from_data(current_vertices, current_edges, obj_type, current_filled)
+                        obj_type = ''
+
                         if isinstance(obj, Point):
                             window.normalizedWindow.clipping.pointClippingCheck(obj)
                             if obj.on_screen:
@@ -605,9 +620,10 @@ class Controller():
                         current_edges = []
                         current_filled = False
                         self.current_color = None
-                        
+                        obj_type = ''  # Reset type here after we've used it
+
                 if current_vertices:
-                    obj = self._create_object_from_data(current_vertices, current_edges, current_filled)
+                    obj = self._create_object_from_data(current_vertices, current_edges, obj_type, current_filled)
                     if isinstance(obj, Point):
                         window.normalizedWindow.clipping.pointClippingCheck(obj)
                         if obj.on_screen:
@@ -630,24 +646,23 @@ class Controller():
             msg.setIcon(QMessageBox.Warning)
             msg.exec_()
             
-    def _create_object_from_data(self, vertices, edges, filled=False):
-        if len(vertices) == 1:
+    def _create_object_from_data(self, vertices, edges, obj_type, filled=False):
+        obj = None
+        if obj_type == 'point':
             obj = Point([vertices[0]])
-        elif len(vertices) == 2:
+        elif obj_type == 'line':
             obj = Line([vertices[0], vertices[1]])
+        elif obj_type == 'polygon':
+            obj = Polygon(vertices, filled=filled)
+        elif obj_type == 'curve':
+            obj = Curve(vertices)
         else:
-            try:
-                obj = Polygon(vertices, filled=filled)
-            except:
-                obj = Curve(vertices)
-            
-        if self.current_color:
+            obj = Polygon(vertices, filled=filled)
+        
+        if obj and self.current_color:
             obj.color = self.current_color
             
-        self.__viewport.objects.append(obj)
-        self.addTree(obj)
+        if obj:
+            self.__viewport.objects.append(obj)
+            self.addTree(obj)
         return obj
-    
-
-    
-    

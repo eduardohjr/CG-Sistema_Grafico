@@ -134,11 +134,6 @@ class Window(QMainWindow):
         select_clipping.setGeometry(330, 10, (BUTTON_WIDTH*2), BUTTON_HEIGHT)
         select_clipping.clicked.connect(self.showClippingRadioButton)
 
-
-
-
-
-
     def mousePressEvent(self, event):
         self.tree.clearSelection()
         self.tree.clearFocus()
