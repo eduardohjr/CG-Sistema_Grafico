@@ -471,7 +471,7 @@ class Controller():
                 obj_type = "point" if isinstance(obj, Point) else \
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
-                        "curve"
+                        obj.type 
                 
                 if obj_type == "polygon":
                     fill_status = "filled" if obj.filled else "unfilled"
@@ -493,10 +493,10 @@ class Controller():
                 descritor.write_to_file(file)
             else:
                 for idx, obj in enumerate(self.__viewport.objects):
-                    obj_type = "point" if isinstance(obj, Point)else \
+                    obj_type = "point" if isinstance(obj, Point) else \
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
-                        "curve"
+                        obj.type 
                     
                     if obj_type == "polygon":
                         fill_status = "filled" if obj.filled else "unfilled"
@@ -566,6 +566,10 @@ class Controller():
                             obj_type = 'point'
                         elif 'Type: line' in line:
                             obj_type = 'line'
+                        elif 'Type: Bezier' in line:
+                            obj_type = 'Bezier'
+                        elif 'Type: BSpline' in line:
+                            obj_type = 'BSpline'
                         elif 'Fill: filled' in line:
                             current_filled = True
                         elif 'Fill: unfilled' in line:
@@ -655,11 +659,9 @@ class Controller():
             obj = Line([vertices[0], vertices[1]])
         elif obj_type == 'polygon':
             obj = Polygon(vertices, filled=filled)
-        elif obj_type == 'curve':
-            obj = Curve(vertices)
         else:
-            obj = Polygon(vertices, filled=filled)
-        
+            obj = Curve(vertices, obj_type)
+
         if obj and self.current_color:
             obj.color = self.current_color
             
