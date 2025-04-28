@@ -610,16 +610,13 @@ class Controller():
 
                         if isinstance(obj, Point):
                             window.normalizedWindow.clipping.pointClippingCheck(obj)
-                            if obj.on_screen:
-                                obj.draw(self.__viewport)
+                            obj.draw(self.__viewport)
                         elif isinstance(obj, Line):
                             obj.draw_points = window.normalizedWindow.clipping.lineClipping(obj)
-                            if obj.on_screen:
-                                obj.draw(self.__viewport)
+                            obj.draw(self.__viewport)
                         elif (isinstance(obj, Polygon) or isinstance(obj, Curve)):
                             obj.applyClipping(window.normalizedWindow.clipping)
-                            if obj.on_screen:
-                                obj.draw(self.__viewport)
+                            obj.draw(self.__viewport)
                         
                         current_vertices = []
                         current_edges = []
@@ -631,16 +628,13 @@ class Controller():
                     obj = self._create_object_from_data(current_vertices, current_edges, obj_type, current_filled)
                     if isinstance(obj, Point):
                         window.normalizedWindow.clipping.pointClippingCheck(obj)
-                        if obj.on_screen:
-                            obj.draw(self.__viewport)
+                        obj.draw(self.__viewport)
                     elif isinstance(obj, Line):
                         obj.draw_points = window.normalizedWindow.clipping.lineClipping(obj)
-                        if obj.on_screen:
-                            obj.draw(self.__viewport)
+                        obj.draw(self.__viewport)
                     elif (isinstance(obj, Polygon) or isinstance(obj, Curve)):
                         obj.applyClipping(window.normalizedWindow.clipping)
-                        if obj.on_screen:
-                            obj.draw(self.__viewport)
+                        obj.draw(self.__viewport)
                     
             self.__viewport.update()
                         
