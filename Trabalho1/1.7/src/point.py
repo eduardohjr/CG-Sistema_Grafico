@@ -52,7 +52,7 @@ class Point(GraphicObject):
 
         self.points = new_points
 
-    def rotationWord(self, angle, viewport):
+    def rotationWorld(self, angle, axis=None):
         angle = (np.radians(angle))
 
         new_points = []
@@ -69,7 +69,7 @@ class Point(GraphicObject):
         self.points = new_points
 
 
-    def rotationPoint(self, angle, point, viewport):
+    def rotationPoint(self, angle, point, axis=None):
         angle = (np.radians(angle))
 
         new_points = []
@@ -102,7 +102,7 @@ class Point(GraphicObject):
         self.points = new_points
 
 
-    def rotationCenter(self, angle, viewport):
+    def rotationCenter(self, angle, axis=None):
         angle = (np.radians(angle))
 
         new_points = []

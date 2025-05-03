@@ -42,3 +42,6 @@ class Object3D(GraphicObject):
     
     def escalonation(self, directions):
         pass
+
+    def applyClipping(self, clipping):
+        pass

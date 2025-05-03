@@ -330,7 +330,7 @@ class Controller():
         helper_text = QLabel("Enter the angle for the object to be rotated:")
         helper_text.setAlignment(Qt.AlignCenter)
         self.angle_input = QLineEdit()
-        self.angle_input.setPlaceholderText("Enter the angle here...")
+        self.angle_input.setPlaceholderText("Enter the angle and axis here...")
         execute_button = QPushButton("Execute")
         execute_button.clicked.connect(lambda : self.executeRotWorld(graphicObject, index, window))
         tab2_layout.addWidget(helper_text)
@@ -346,7 +346,7 @@ class Controller():
         helper_text = QLabel("Enter angle for the object to be rotated:")
         helper_text.setAlignment(Qt.AlignCenter)
         self.angle_input2 = QLineEdit()
-        self.angle_input2.setPlaceholderText("Enter the angle here...")
+        self.angle_input2.setPlaceholderText("Enter the angle and axis here...")
         execute_button = QPushButton("Execute")
         execute_button.clicked.connect(lambda: self.executeRotCenter(graphicObject, index, window))
         tab2_layout.addWidget(helper_text)
@@ -362,7 +362,7 @@ class Controller():
         helper_text = QLabel("Enter the point and angle for the object to be rotated:")
         helper_text.setAlignment(Qt.AlignCenter)
         self.angle_input3 = QLineEdit()
-        self.angle_input3.setPlaceholderText("Ex: x,y,45")
+        self.angle_input3.setPlaceholderText("Ex: x,y,z,45,axis")
         execute_button = QPushButton("Execute")
         execute_button.clicked.connect(lambda: self.executeRotPoint(graphicObject, index, window))
         tab2_layout.addWidget(helper_text)
@@ -373,10 +373,10 @@ class Controller():
         self.tab_content.addWidget(tab2_widget)
 
     def executeRotWorld(self, object, index, window):
-        angle = self.angle_input.text()
         previous_on_screen = object.on_screen
         try:
-            object.rotationWord(float(angle))
+            angle, axis = self.angle_input.text().split(',')
+            object.rotationWorld(float(angle), axis)
             self.updateObject(object, index)
             self.dialog.close()
 
@@ -402,10 +402,10 @@ class Controller():
             return
 
     def executeRotCenter(self, object, index, window):
-        angle = self.angle_input2.text()
         previous_on_screen = object.on_screen
         try:
-            object.rotationCenter(float(angle))
+            angle, axis = self.angle_input2.text().split(',')
+            object.rotationCenter(float(angle), axis)
             self.updateObject(object, index)
             self.dialog.close()
 
@@ -432,11 +432,13 @@ class Controller():
         inputs = self.angle_input3.text()
         previous_on_screen = object.on_screen
         try:
-            inputs = tuple(map(float, inputs.split(',')))
-            angle = inputs[2]
-            points = [inputs[i] for i in range(0,2)]
-            if (len(inputs) == 3):
-                object.rotationPoint(angle, points)
+            inputs = inputs.split(',')
+            values = tuple((float(value) for value in inputs[:4]))
+            angle = values[3]
+            points = [values[i] for i in range(0,3)]
+            axis = inputs[4]
+            if (len(inputs) == 5):
+                object.rotationPoint(angle, points, axis)
                 self.updateObject(object, index)
                 self.dialog.close()
 
@@ -467,12 +469,12 @@ class Controller():
 
     def takeInputs(self, window):
         coordenates, done = QInputDialog.getText(
-            window, 'Input Dialog', 'Give points like this -> x,y :') 
+            window, 'Input Dialog', 'Give points like this -> x,y,z :') 
 
         if done :
             try:
                 coordenates = tuple(map(float, coordenates.split(',')))
-                if (len(coordenates) == 2):
+                if (len(coordenates) == 3):
                     return coordenates
                 else:
                     self.commaPopUp(1)

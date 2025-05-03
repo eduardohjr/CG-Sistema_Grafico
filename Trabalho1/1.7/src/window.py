@@ -51,7 +51,10 @@ class Window(QMainWindow):
     def closeEvent(self, event):
         self.radioButton.clipping_widget.close()
         self.radioButton.curve_widget.close()
-        self.controller.form_window_3D_point.close()
+        try:
+            self.controller.form_window_3D_point.close()
+        except:
+            return
 
     def createButtons(self):
         up = QPushButton(self)
@@ -158,27 +161,6 @@ class Window(QMainWindow):
         draw3DObject.setText("Draw 3D Object")
         draw3DObject.setGeometry(190, 440, (BUTTON_WIDTH*2), BUTTON_HEIGHT)
         draw3DObject.clicked.connect(self.controller.drawObject3DEvent)
-
-##########################################################################################################################
-#                               AREA DE TESTE
-
-
-        teste = QPushButton(self)
-        teste.setText("Tetse")
-        teste.setGeometry(400, 600, (BUTTON_WIDTH), BUTTON_HEIGHT)
-        teste.clicked.connect(self.teste)
-
-    def teste(self):
-
-        points = (((-50), (-50), 0),((50), (-50), 0),((50) , (50), 0),((-50), (50), 0),(0, 0, 150))
-        segments = ([((-50), (-50), 0), ((50), (-50), 0)],[((50), (-50), 0), ((50) , (50), 0)],[((50) , (50), 0), ((-50), (50), 0)],[((-50), (50), 0), ((-50), (-50), 0)],[((-50), (-50), 0), (0, 0, 150)],[((50), (-50), 0), (0, 0, 150)],[((50) , (50), 0), (0, 0, 150)],[((-50), (50), 0), (0, 0, 150)])
-        
-        obj = Object3D(points, segments)
-        obj.draw(self.viewport)
-
-
-
-##########################################################################################################################3
 
     def mousePressEvent(self, event):
         self.tree.clearSelection()

@@ -53,7 +53,7 @@ class Line(GraphicObject):
 
         self.points = new_points
 
-    def rotationWord(self, angle):
+    def rotationWorld(self, angle, axis=None):
         angle = (np.radians(angle))
 
         new_points = []
@@ -70,7 +70,7 @@ class Line(GraphicObject):
         self.points = new_points
 
 
-    def rotationPoint(self, angle, point):
+    def rotationPoint(self, angle, point, axis=None):
         angle = (np.radians(angle))
 
         new_points = []
@@ -103,7 +103,7 @@ class Line(GraphicObject):
         self.points = new_points
 
 
-    def rotationCenter(self, angle):
+    def rotationCenter(self, angle, axis=None):
         angle = (np.radians(angle))
 
         new_points = []

@@ -1,35 +1,181 @@
 from graphicObject import *
-from PyQt5.QtCore import Qt, QPointF, QLineF
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGraphicsEllipseItem
 from constants import CAM_DISTANCE
 
 class Point3D(GraphicObject):
     def __init__(self, points):
         super().__init__(points)
         self.points = points
-        self.center = self.calculateCenter()
         self.color = None
+        self.on_screen = True
 
 
     def draw(self, viewport):
-        projection = self.projection()
-        self.id = viewport.scene().addEllipse(projection.x() , projection.y() - 3, 5, 5) 
+        self.center = self.calculateCenter()
+        x, y = self.projection()  
+        cx = self.center[0]  
+        cy = self.center[1]    
+        raio = 4
+
+        self.id = QGraphicsEllipseItem(x - raio, -y - raio, raio * 2, raio * 2)
+        self.id.setBrush(QBrush(Qt.red))
+        viewport.scene().addItem(self.id)
 
     def projection(self):
         x = self.points[0][0]
         y = self.points[0][1]
-        z = self.points[0][2]
-        if z != 0:
-            x_proj = (x * CAM_DISTANCE) / z
-            y_proj = (y * CAM_DISTANCE) / z
-        else:
-            x_proj, y_proj = x, y
-        return QPointF(x_proj, y_proj)
-    
-
         
-    def translation(self, directions):
-        pass
+        x = int(x * CAM_DISTANCE)
+        y = int (y * CAM_DISTANCE)
 
+        return x,y
     
-    def escalonation(self, directions):
+    
+    def translation(self, directions):
+
+        dx, dy, dz = directions
+
+        T = np.array([
+            [1, 0, 0, dx],
+            [0, 1, 0, dy],
+            [0, 0, 1, dz],
+            [0, 0, 0, 1]
+        ])
+
+        x, y, z = self.points[0]
+        ponto_h = np.array([x, y, z, 1])
+
+        resultado = T @ ponto_h
+
+        self.points[0] = resultado[:3]
+
+    def escalonation(self, scale):
+        self.center = self.calculateCenter()
+        cx = self.center[0]
+        cy = self.center[1]
+        cz = self.center[2]
+
+        T1 = np.array([
+            [1, 0, 0, -cx],
+            [0, 1, 0, -cy],
+            [0, 0, 1, -cz],
+            [0, 0, 0, 1]
+        ])
+
+        S = np.array([
+            [scale[0], 0,  0,  0],
+            [0,  scale[1], 0,  0],
+            [0,  0,  scale[2], 0],
+            [0,  0,  0,  1]
+        ])
+
+        T2 = np.array([
+            [1, 0, 0, cx],
+            [0, 1, 0, cy],
+            [0, 0, 1, cz],
+            [0, 0, 0, 1]
+        ])
+
+        transform = T2 @ S @ T1
+
+        x, y, z = self.points[0]
+        ponto_h = np.array([x, y, z, 1])
+        result = transform @ ponto_h
+
+        self.points[0] = result[:3]
+
+
+    def rotationWorld(self, angle, axis):
+
+        angle = np.radians(angle)
+        cos_a = np.cos(angle)
+        sin_a = np.sin(angle)
+
+        if axis == 'x':
+            R = np.array([
+                [1,     0,      0,     0],
+                [0,  cos_a, -sin_a,  0],
+                [0,  sin_a,  cos_a,  0],
+                [0,     0,      0,     1]
+            ])
+        elif axis == 'y':
+            R = np.array([
+                [cos_a,  0, sin_a, 0],
+                [0,      1,    0,  0],
+                [-sin_a, 0, cos_a, 0],
+                [0,      0,    0,  1]
+            ])
+        elif axis == 'z':
+            R = np.array([
+                [cos_a, -sin_a, 0, 0],
+                [sin_a,  cos_a, 0, 0],
+                [0,         0,  1, 0],
+                [0,         0,  0, 1]
+            ])
+        else:
+            raise ValueError("Invalid axis")
+
+        x, y, z = self.points[0]
+        ponto_h = np.array([x, y, z, 1])
+        resultado = R @ ponto_h
+        self.points[0] = resultado[:3]
+
+
+    def rotationPoint(self, angle, point, axis):
+
+        px, py, pz = point
+        angle = np.radians(angle)
+        cos_a = np.cos(angle)
+        sin_a = np.sin(angle)
+
+        T1 = np.array([
+            [1, 0, 0, -px],
+            [0, 1, 0, -py],
+            [0, 0, 1, -pz],
+            [0, 0, 0, 1]
+        ])
+
+        T2 = np.array([
+            [1, 0, 0, px],
+            [0, 1, 0, py],
+            [0, 0, 1, pz],
+            [0, 0, 0, 1]
+        ])
+
+        if axis == 'x':
+            R = np.array([
+                [1,     0,      0,     0],
+                [0,  cos_a, -sin_a,  0],
+                [0,  sin_a,  cos_a,  0],
+                [0,     0,      0,     1]
+            ])
+        elif axis == 'y':
+            R = np.array([
+                [cos_a,  0, sin_a, 0],
+                [0,      1,    0,  0],
+                [-sin_a, 0, cos_a, 0],
+                [0,      0,    0,  1]
+            ])
+        elif axis == 'z':
+            R = np.array([
+                [cos_a, -sin_a, 0, 0],
+                [sin_a,  cos_a, 0, 0],
+                [0,         0,  1, 0],
+                [0,         0,  0, 1]
+            ])
+        else:
+            raise ValueError("Invalid axis")
+
+        transform = T2 @ R @ T1
+        x, y, z = self.points[0]
+        ponto_h = np.array([x, y, z, 1])
+        resultado = transform @ ponto_h
+        self.points[0] = resultado[:3]
+
+
+    def rotationCenter(self, angle, axis):
+        self.rotationPoint(angle, self.center, axis)
+
+    def applyClipping(self, clipping):
         pass
