@@ -24,14 +24,14 @@ class Controller():
         self.zoomOut_multiplier = 0.9
         self.treeIndex = 0
         self.color = None
-        self.normalizedInfos = {UP: [[0,self.move_multiplier], [1,1], 0],
-                                DOWN: [[0,-self.move_multiplier], [1,1],0],
-                                LEFT: [[-self.move_multiplier,0], [1,1],0],
-                                RIGHT: [[self.move_multiplier,0], [1,1],0],
-                                IN: [[0,0], [self.zoomIn_mutiplier, self.zoomIn_mutiplier], 0],
-                                OUT: [[0,0], [self.zoomOut_multiplier, self.zoomOut_multiplier], 0],
-                                WLEFT: [[0,0], [1,1], -10],
-                                WRIGHT: [[0,0], [1,1], 10]
+        self.normalizedInfos = {UP: [[0, self.move_multiplier, 0], [1, 1, 1], [0, 0, 0]],
+                                DOWN: [[0, -self.move_multiplier, 0], [1, 1, 1], [0, 0, 0]],
+                                LEFT: [[-self.move_multiplier, 0, 0], [1, 1, 1], [0, 0, 0]],
+                                RIGHT: [[self.move_multiplier, 0, 0], [1, 1, 1], [0, 0, 0]],
+                                IN: [[0, 0, 0], [self.zoomIn_mutiplier]*3, [0, 0, 0]],
+                                OUT: [[0, 0, 0], [self.zoomOut_multiplier]*3, [0, 0, 0]],
+                                WLEFT: [[0, 0, 0], [1, 1, 1], [0, 0, -10]], 
+                                WRIGHT: [[0, 0, 0], [1, 1, 1], [0, 0, 10]]   
                                 }
         self.curve_type = "Bezier"
 
@@ -81,6 +81,7 @@ class Controller():
         label = QLabel("Enter the point's coordinates: ", self.form_window_3D_point)
         layout.addWidget(label)
 
+        
         text_input = QLineEdit(self.form_window_3D_point)
         text_input.setPlaceholderText("x,y,z")
         layout.addWidget(text_input)
@@ -94,6 +95,8 @@ class Controller():
                 coordenates = tuple(map(float, text.split(',')))
                 if (len(coordenates) == 3):
                         obj = Point3D([coordenates])
+                        self.color = QColorDialog().getColor()
+                        obj.color = self.color
                         self.__viewport.objects.append(obj)
                         obj.draw(self.__viewport)
                         self.addTree(obj)
@@ -117,12 +120,17 @@ class Controller():
         label = QLabel("Enter the objects's coordinates: ", self.form_window_3D_point)
         layout.addWidget(label)
 
+        example = QLabel("Ex:\n(0,0,0),(0,0,100),(0,100,0),(0,100,100),(100,0,0),(100,0,100),(100,100,0),(100,100,100)\n"
+                        "(0, 1), (0, 2), (0, 4),(1, 3), (1, 5), (2, 3),(2, 6), (3, 7), (4, 5),(4, 6),(5, 7),(6, 7)\n")
+        example.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        layout.addWidget(example)
+
         points_input = QLineEdit(self.form_window_3D_point)
-        points_input.setPlaceholderText("(P1, P2, ... Pn) ---> Px = (x,y,z)")
+        points_input.setPlaceholderText("P1, P2, ... Pn ---> Px = (x,y,z)")
         layout.addWidget(points_input)
 
         segments_input = QLineEdit(self.form_window_3D_point)
-        segments_input.setPlaceholderText("([P1, P2], [P2, P3], ... [Pn, P1]) ---> Px = (x,y,z)")
+        segments_input.setPlaceholderText("(P1, P2), (P2, P3), ... (Pn-1, Pn) ---> ex: (0, 1), (1,2)")
         layout.addWidget(segments_input)
 
         def create_object():
@@ -132,14 +140,24 @@ class Controller():
             points_input.clear()
 
             try :
-                coordenates = eval(points_tex)
-                if (len(coordenates) > 1):
+                points_values = eval(points_tex)
+                segments_values = eval(segments_text)
+                if (len(points_values) > 2) and (len(segments_values) > 2):
                     try:
-                        segments = eval(segments_text)
-                        obj = Object3D(coordenates, segments)
-                        self.__viewport.objects.append(obj)
-                        obj.draw(self.__viewport)
-                        self.addTree(obj)
+                            points = []
+                            segments = []
+                            for i in range(len(points_values)):
+                                x, y, z = map(float, points_values[i])
+                                points.append(Point3D([(x,y,z)]))
+                            for i in range(len(segments_values)):
+                                p1,p2 = map(int, segments_values[i])
+                                segments.append((p1,p2))
+                            obj = Object3D(points, segments)
+                            self.color = QColorDialog().getColor()
+                            obj.color = self.color
+                            self.__viewport.objects.append(obj)
+                            obj.draw(self.__viewport)
+                            self.addTree(obj)
                     except:
                         self.instructionsPopUp()
                 else:
@@ -221,7 +239,7 @@ class Controller():
                 graphicObject.translation(input)
 
             if (previous_on_screen):
-                if (isinstance(graphicObject, Polygon) or isinstance(graphicObject, Curve)):
+                if (isinstance(graphicObject, Polygon) or isinstance(graphicObject, Curve) or isinstance(graphicObject, Object3D)):
                     for item in graphicObject.id:
                         self.__scene.removeItem(item)
                 else:
@@ -251,7 +269,7 @@ class Controller():
                 graphicObject.escalonation(input)
 
             if (previous_on_screen):
-                if (isinstance(graphicObject, Polygon) or isinstance(graphicObject, Curve)):
+                if (isinstance(graphicObject, Polygon) or isinstance(graphicObject, Curve) or isinstance(graphicObject, Object3D)):
                     for item in graphicObject.id:
                         self.__scene.removeItem(item)
                 else:
@@ -381,7 +399,7 @@ class Controller():
             self.dialog.close()
 
             if (previous_on_screen):
-                if (isinstance(object, Polygon) or isinstance(object, Curve)):
+                if (isinstance(object, Polygon) or isinstance(object, Curve) or isinstance(object, Object3D)):
                     for item in object.id:
                         self.__scene.removeItem(item)
                 else:
@@ -410,7 +428,7 @@ class Controller():
             self.dialog.close()
 
             if (previous_on_screen):
-                if (isinstance(object, Polygon) or isinstance(object, Curve)):
+                if (isinstance(object, Polygon) or isinstance(object, Curve) or isinstance(object, Object3D)):
                     for item in object.id:
                         self.__scene.removeItem(item)
                 else:
@@ -444,7 +462,7 @@ class Controller():
 
 
                 if (previous_on_screen):
-                    if (isinstance(object, Polygon) or isinstance(object, Curve)):
+                    if (isinstance(object, Polygon) or isinstance(object, Curve) or isinstance(object, Object3D)):
                         for item in object.id:
                             self.__scene.removeItem(item)
                     else:

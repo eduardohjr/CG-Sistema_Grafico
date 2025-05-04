@@ -10,16 +10,13 @@ class Point3D(GraphicObject):
         self.color = None
         self.on_screen = True
 
-
     def draw(self, viewport):
         self.center = self.calculateCenter()
-        x, y = self.projection()  
-        cx = self.center[0]  
-        cy = self.center[1]    
-        raio = 4
+        x, y = self.projection()     
+        radius = 4
 
-        self.id = QGraphicsEllipseItem(x - raio, -y - raio, raio * 2, raio * 2)
-        self.id.setBrush(QBrush(Qt.red))
+        self.id = QGraphicsEllipseItem(x - radius, -y - radius, radius * 2, radius * 2)
+        self.id.setBrush(QBrush(self.color))
         viewport.scene().addItem(self.id)
 
     def projection(self):
@@ -44,11 +41,11 @@ class Point3D(GraphicObject):
         ])
 
         x, y, z = self.points[0]
-        ponto_h = np.array([x, y, z, 1])
+        points_matrix = np.array([x, y, z, 1])
 
-        resultado = T @ ponto_h
+        result = T @ points_matrix
 
-        self.points[0] = resultado[:3]
+        self.points[0] = result[:3]
 
     def escalonation(self, scale):
         self.center = self.calculateCenter()
@@ -80,8 +77,8 @@ class Point3D(GraphicObject):
         transform = T2 @ S @ T1
 
         x, y, z = self.points[0]
-        ponto_h = np.array([x, y, z, 1])
-        result = transform @ ponto_h
+        points_matrix = np.array([x, y, z, 1])
+        result = transform @ points_matrix
 
         self.points[0] = result[:3]
 
@@ -114,12 +111,12 @@ class Point3D(GraphicObject):
                 [0,         0,  0, 1]
             ])
         else:
-            raise ValueError("Invalid axis")
+            raise ValueError("Invalid axis. Use 'x', 'y', or 'z'.")
 
         x, y, z = self.points[0]
-        ponto_h = np.array([x, y, z, 1])
-        resultado = R @ ponto_h
-        self.points[0] = resultado[:3]
+        points_matrix = np.array([x, y, z, 1])
+        resukt = R @ points_matrix
+        self.points[0] = resukt[:3]
 
 
     def rotationPoint(self, angle, point, axis):
@@ -165,13 +162,13 @@ class Point3D(GraphicObject):
                 [0,         0,  0, 1]
             ])
         else:
-            raise ValueError("Invalid axis")
+            raise ValueError("Invalid axis. Use 'x', 'y', or 'z'.")
 
         transform = T2 @ R @ T1
         x, y, z = self.points[0]
-        ponto_h = np.array([x, y, z, 1])
-        resultado = transform @ ponto_h
-        self.points[0] = resultado[:3]
+        points_matrix = np.array([x, y, z, 1])
+        result = transform @ points_matrix
+        self.points[0] = result[:3]
 
 
     def rotationCenter(self, angle, axis):
