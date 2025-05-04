@@ -12,10 +12,7 @@ class Object3D(GraphicObject):
         self.segments = segments
 
     def getPoints(self):
-        points = []
-        for p in self.points:
-            points.append(p.points[0])
-        return points
+        return [p.points[0] for p in self.points]
 
     def draw(self, viewport):
         self.id = []
@@ -24,7 +21,8 @@ class Object3D(GraphicObject):
             p2 = self.points[i2]
             x1, y1 = p1.projection()
             x2, y2 = p2.projection()
-            line = QGraphicsLineItem(x1, y1, x2, y2)
+            
+            line = QGraphicsLineItem(x1, -y1, x2, -y2)
             line.setPen(QPen(self.color))
             self.id.append(line)
             viewport.scene().addItem(line)

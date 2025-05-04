@@ -14,10 +14,13 @@ class Point3D(GraphicObject):
         self.center = self.calculateCenter()
         x, y = self.projection()     
         radius = 4
+        
 
         self.id = QGraphicsEllipseItem(x - radius, -y - radius, radius * 2, radius * 2)
         self.id.setBrush(QBrush(self.color))
         viewport.scene().addItem(self.id)
+
+    
 
     def projection(self):
         x = self.points[0][0]

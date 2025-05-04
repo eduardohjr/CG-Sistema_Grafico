@@ -22,10 +22,8 @@ class NormalizedWindow:
         scale = infos[1]
         rotation = infos[2]
 
-        # Converta ângulos para radianos
         rx, ry, rz = np.radians(rotation)
 
-        # Matrizes de transformação 3D
         T = np.array([
             [1, 0, 0, translation[0]],
             [0, 1, 0, translation[1]],
@@ -40,7 +38,6 @@ class NormalizedWindow:
             [0, 0, 0, 1]
         ])
 
-        # Rotações nos 3 eixos
         Rx = np.array([
             [1, 0, 0, 0],
             [0, np.cos(rx), -np.sin(rx), 0],
@@ -62,17 +59,15 @@ class NormalizedWindow:
             [0, 0, 0, 1]
         ])
 
-        # Transformação total
         transform = T @ Rz @ Ry @ Rx @ S
 
-        # Se ponto for 2D (len 3), converta para 3D homogêneo
-        if len(point) == 3:
+        if len(point) == 2:
             point = np.array([point[0], point[1], 0, 1])
         else:
             point = np.array([point[0], point[1], point[2], 1])
 
         result = transform @ point
-        return result[:3]  # Retorna x, y, z transformados
+        return result[:3] 
     
     def normalize(self, obj, infos):
 
@@ -80,19 +75,15 @@ class NormalizedWindow:
         previous_on_screen = obj.on_screen
 
         for p in obj.getPoints():
-            # Converte para 3D se for ponto 2D
             if len(p) == 2:
                 p = [p[0], p[1], 0]
             result = self.calculate_transformation(p, infos)
             
-            # Adiciona como objeto Point3D
             new_points.append(Point3D([(result[0], result[1], result[2])]))
 
-        # Atualiza os pontos do objeto com novos Point3D
         if isinstance(obj, Object3D):
             obj.points = new_points
 
-            # Clipping e renderização
             obj.applyClipping(self.clipping)
             if obj.on_screen:
                 obj.center = obj.calculateCenter()
@@ -105,7 +96,6 @@ class NormalizedWindow:
                     for item in obj.id:
                         self.viewport.scene().removeItem(item)
         else:
-            # Para objetos 2D (ponto, linha, curva etc.)
             flat_points = []
             for p in new_points:
                 flat_points.append([p.points[0][0], p.points[0][1]])

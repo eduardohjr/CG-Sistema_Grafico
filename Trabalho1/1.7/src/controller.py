@@ -24,8 +24,8 @@ class Controller():
         self.zoomOut_multiplier = 0.9
         self.treeIndex = 0
         self.color = None
-        self.normalizedInfos = {UP: [[0, self.move_multiplier, 0], [1, 1, 1], [0, 0, 0]],
-                                DOWN: [[0, -self.move_multiplier, 0], [1, 1, 1], [0, 0, 0]],
+        self.normalizedInfos = {UP: [[0, -self.move_multiplier, 0], [1, 1, 1], [0, 0, 0]],
+                                DOWN: [[0, self.move_multiplier, 0], [1, 1, 1], [0, 0, 0]],
                                 LEFT: [[-self.move_multiplier, 0, 0], [1, 1, 1], [0, 0, 0]],
                                 RIGHT: [[self.move_multiplier, 0, 0], [1, 1, 1], [0, 0, 0]],
                                 IN: [[0, 0, 0], [self.zoomIn_mutiplier]*3, [0, 0, 0]],
