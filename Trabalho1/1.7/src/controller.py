@@ -580,6 +580,8 @@ class Controller():
             if index is not None:
                 obj = self.__viewport.objects[index]
                 obj_type = "point" if isinstance(obj, Point) else \
+                        "point3d" if isinstance(obj, Point3D) else \
+                        "object3d" if isinstance(obj, Object3D) else \
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
                         obj.type 
@@ -591,20 +593,36 @@ class Controller():
                     file.write(f"# Clipping: {clip_status}\n")
                 
                 descritor = DescriptorOBJ(f"obj_{index}", obj_type, obj.color, getattr(obj, 'filled', False))
-                for point in obj.points:
-                    descritor.add_vertex(point[0], point[1], 0)
-                
-                if obj_type == "point":
+                if isinstance(obj, Point3D):
+                    x, y, z = obj.points[0]
+                    descritor.add_vertex(x, y, z)
                     descritor.add_edge(0, 0)
-                elif obj_type == "line":
-                    descritor.add_edge(0, 1)
+                elif isinstance(obj, Object3D):
+                    for point in obj.points:
+                        x, y, z = point.points[0]
+                        descritor.add_vertex(x, y, z)
+                    for edge in obj.segments:
+                        descritor.add_edge(edge[0], edge[1])
                 else:
-                    descritor.add_face(range(len(obj.points)))
+                    if isinstance(obj, Point3D):
+                        x, y, z = obj.points[0]
+                        descritor.add_vertex(x, y, z)
+                    else:
+                        for point in obj.points:
+                            descritor.add_vertex(point[0], point[1], point[2] if len(point) > 2 else 0)
+                    if obj_type == "point":
+                        descritor.add_edge(0, 0)
+                    elif obj_type == "line":
+                        descritor.add_edge(0, 1)
+                    else:
+                        descritor.add_face(range(len(obj.points)))
                 
                 descritor.write_to_file(file)
             else:
                 for idx, obj in enumerate(self.__viewport.objects):
                     obj_type = "point" if isinstance(obj, Point) else \
+                        "point3d" if isinstance(obj, Point3D) else \
+                        "object3d" if isinstance(obj, Object3D) else \
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
                         obj.type 
@@ -668,12 +686,11 @@ class Controller():
                         continue
                         
                     if line.startswith('#'):
-                        # Parse type and fill status from comments
                         if 'Type: polygon' in line:
                             obj_type = 'polygon'
                         elif 'Type: curve' in line:
                             obj_type = 'curve'
-                        elif 'Type: point' in line:
+                        elif 'Type: point' in line and 'Type: point3d' not in line:
                             obj_type = 'point'
                         elif 'Type: line' in line:
                             obj_type = 'line'
@@ -681,6 +698,10 @@ class Controller():
                             obj_type = 'Bezier'
                         elif 'Type: BSpline' in line:
                             obj_type = 'BSpline'
+                        elif 'Type: point3d' in line:
+                            obj_type = 'point3d'
+                        elif 'Type: object3d' in line:
+                            obj_type = 'object3d'
                         elif 'Fill: filled' in line:
                             current_filled = True
                         elif 'Fill: unfilled' in line:
@@ -694,7 +715,10 @@ class Controller():
                     if parts[0] == 'v':
                         try:
                             x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
-                            current_vertices.append((x, y))
+                            if obj_type in ['point3d', 'object3d']:
+                                current_vertices.append((x, y, z))
+                            else:
+                                current_vertices.append((x, y))
                         except (IndexError, ValueError):
                             continue
                             
@@ -715,7 +739,7 @@ class Controller():
                             continue
                     
                     if (parts[0] == 'o' or not line) and current_vertices:
-                        print(f"Creating object with type: {obj_type}")  # Debug print
+                        print(f"Creating object with type: {obj_type}")
                         obj = self._create_object_from_data(current_vertices, current_edges, obj_type, current_filled)
                         obj_type = ''
 
@@ -728,16 +752,24 @@ class Controller():
                         elif (isinstance(obj, Polygon) or isinstance(obj, Curve)):
                             obj.applyClipping(window.normalizedWindow.clipping)
                             obj.draw(self.__viewport)
+                        elif (isinstance(obj, Object3D)):
+                            obj.applyClipping(window.normalizedWindow.clipping)
+                            obj.draw(self.__viewport)
+                        elif (isinstance(obj, Point3D)):
+                            window.normalizedWindow.clipping.pointClippingCheck(obj)
+                            obj.draw(self.__viewport)
+                        
                         
                         current_vertices = []
                         current_edges = []
                         current_filled = False
                         self.current_color = None
-                        obj_type = ''  # Reset type here after we've used it
+                        obj_type = ''
 
                 if current_vertices:
                     obj = self._create_object_from_data(current_vertices, current_edges, obj_type, current_filled)
-                    if isinstance(obj, Point):
+                    print(f"Creating object with type: {obj_type}")
+                    if isinstance(obj, Point) and obj_type == 'point':
                         window.normalizedWindow.clipping.pointClippingCheck(obj)
                         obj.draw(self.__viewport)
                     elif isinstance(obj, Line):
@@ -746,6 +778,13 @@ class Controller():
                     elif (isinstance(obj, Polygon) or isinstance(obj, Curve)):
                         obj.applyClipping(window.normalizedWindow.clipping)
                         obj.draw(self.__viewport)
+                    elif (isinstance(obj, Object3D)):
+                            obj.applyClipping(window.normalizedWindow.clipping)
+                            obj.draw(self.__viewport)
+                    elif (isinstance(obj, Point3D)):
+                        window.normalizedWindow.clipping.pointClippingCheck(obj)
+                        obj.draw(self.__viewport)
+                        
                     
             self.__viewport.update()
                         
@@ -760,6 +799,11 @@ class Controller():
         obj = None
         if obj_type == 'point':
             obj = Point([vertices[0]])
+        elif obj_type == 'point3d':
+            obj = Point3D([vertices[0]])
+        elif obj_type == 'object3d':
+            points = [Point3D([v]) for v in vertices]
+            obj = Object3D(points, edges)
         elif obj_type == 'line':
             obj = Line([vertices[0], vertices[1]])
         elif obj_type == 'polygon':
