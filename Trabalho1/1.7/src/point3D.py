@@ -27,7 +27,7 @@ class Point3D(GraphicObject):
         y = self.points[0][1]
         
         x = int(x * CAM_DISTANCE)
-        y = int (y * CAM_DISTANCE)
+        y = int (-y * CAM_DISTANCE)
 
         return x,y
     
