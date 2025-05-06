@@ -605,7 +605,7 @@ class Controller():
                         descritor.add_edge(edge[0], edge[1])
                 else:
                     if isinstance(obj, Point3D):
-                        x, y, z = obj.points[0]
+                        x, y, z = obj.points[0]                
                         descritor.add_vertex(x, y, z)
                     else:
                         for point in obj.points:
@@ -634,15 +634,30 @@ class Controller():
                         file.write(f"# Clipping: {clip_status}\n")
                     
                     descritor = DescriptorOBJ(f"obj_{idx}", obj_type, obj.color, getattr(obj, 'filled', False))
-                    for point in obj.points:
-                        descritor.add_vertex(point[0], point[1], 0)
-                    
-                    if obj_type == "point":
+                    if isinstance(obj, Point3D):
+                        x, y, z = obj.points[0]
+                        descritor.add_vertex(x, y, z)
                         descritor.add_edge(0, 0)
-                    elif obj_type == "line":
-                        descritor.add_edge(0, 1)
+                    elif isinstance(obj, Object3D):
+                        for point in obj.points:
+                            x, y, z = point.points[0]
+                            descritor.add_vertex(x, y, z)
+                        for edge in obj.segments:
+                            descritor.add_edge(edge[0], edge[1])
                     else:
-                        descritor.add_face(range(len(obj.points)))
+                        if isinstance(obj, Point3D):
+                            x, y, z = obj.points[0]                
+                            descritor.add_vertex(x, y, z)
+                        else:
+                            for point in obj.points:
+                                descritor.add_vertex(point[0], point[1], point[2] if len(point) > 2 else 0)
+                        if obj_type == "point":
+                            descritor.add_edge(0, 0)
+                        elif obj_type == "line":
+                            descritor.add_edge(0, 1)
+                        else:
+                            descritor.add_face(range(len(obj.points)))
+
                     
                     descritor.write_to_file(file)
                     file.write("\n")
