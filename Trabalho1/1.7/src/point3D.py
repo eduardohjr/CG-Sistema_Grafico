@@ -168,6 +168,7 @@ class Point3D(GraphicObject):
             raise ValueError("Invalid axis. Use 'x', 'y', or 'z'.")
 
         transform = T2 @ R @ T1
+        print(self.points)
         x, y, z = self.points[0]
         points_matrix = np.array([x, y, z, 1])
         result = transform @ points_matrix

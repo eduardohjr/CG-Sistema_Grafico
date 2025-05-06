@@ -70,7 +70,6 @@ class NormalizedWindow:
         return result[:3] 
     
     def normalize(self, obj, infos):
-
         new_points = []
         previous_on_screen = obj.on_screen
 
@@ -78,11 +77,10 @@ class NormalizedWindow:
             if len(p) == 2:
                 p = [p[0], p[1], 0]
             result = self.calculate_transformation(p, infos)
-            
-            new_points.append(Point3D([(result[0], result[1], result[2])]))
+            new_points.append((result[0], result[1], result[2]))
 
         if isinstance(obj, Object3D):
-            obj.points = new_points
+            obj.points = [Point3D([pt]) for pt in new_points]
 
             obj.applyClipping(self.clipping)
             if obj.on_screen:
@@ -96,11 +94,7 @@ class NormalizedWindow:
                     for item in obj.id:
                         self.viewport.scene().removeItem(item)
         else:
-            flat_points = []
-            for p in new_points:
-                flat_points.append([p.points[0][0], p.points[0][1]])
-
-            obj.points = flat_points.copy()
+            obj.points = new_points.copy()
 
             if isinstance(obj, Point):
                 self.clipping.pointClippingCheck(obj)
