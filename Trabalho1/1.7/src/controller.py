@@ -511,10 +511,10 @@ class Controller():
         msg = QMessageBox()
         msg.setWindowTitle("ERROR")
         if type == 1:
-            msg.setText("Give only one coordenate (x,y) \n"
+            msg.setText("Give only one coordenate (x,y,z) \n"
                         "Use '.' to separate fractional numbers")
         elif type == 2:
-            msg.setText("Give only one coordenate (x,y) and one angle (n)\n"
+            msg.setText("Give only one coordenate (x,y,z) and one angle (n)\n"
                         "Use '.' to separate fractional numbers")
         elif type == 3:
             msg.setText("Give only one coordenate (x,y,z)\n"
@@ -771,9 +771,8 @@ class Controller():
                             obj.applyClipping(window.normalizedWindow.clipping)
                             obj.draw(self.__viewport)
                         elif (isinstance(obj, Point3D)):
-                            window.normalizedWindow.clipping.pointClippingCheck(obj)
+                            obj.applyClipping(window.normalizedWindow.clipping)                            
                             obj.draw(self.__viewport)
-                        
                         
                         current_vertices = []
                         current_edges = []
@@ -794,11 +793,12 @@ class Controller():
                         obj.applyClipping(window.normalizedWindow.clipping)
                         obj.draw(self.__viewport)
                     elif (isinstance(obj, Object3D)):
-                            obj.applyClipping(window.normalizedWindow.clipping)
-                            obj.draw(self.__viewport)
-                    elif (isinstance(obj, Point3D)):
-                        window.normalizedWindow.clipping.pointClippingCheck(obj)
+                        obj.applyClipping(window.normalizedWindow.clipping)
                         obj.draw(self.__viewport)
+                    elif (isinstance(obj, Point3D)):
+                        obj.applyClipping(window.normalizedWindow.clipping)                            
+                        obj.draw(self.__viewport)
+                        
                         
                     
             self.__viewport.update()
