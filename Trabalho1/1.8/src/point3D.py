@@ -25,7 +25,6 @@ class Point3D(GraphicObject):
         x, y, z = self.points[0]
         d = const.CAM_DISTANCE
 
-        # Matriz de perspectiva homogênea
         point = np.array([x, y, z, 1])
         m_per = np.array([
             [1, 0, 0, 0],
@@ -39,10 +38,9 @@ class Point3D(GraphicObject):
         if w == 0:
             w = 1e-5
 
-        # Coordenadas normalizadas (NDC)
         x_ndc = result[0] / w
         y_ndc = result[1] / w
-        # Retorna no formato que o sistema espera: coordenadas normalizadas [-1, 1]
+        
         return x_ndc, y_ndc
 
 
