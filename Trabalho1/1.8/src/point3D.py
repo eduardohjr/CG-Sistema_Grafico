@@ -11,6 +11,9 @@ class Point3D(GraphicObject):
         self.on_screen = True
 
     def draw(self, viewport):
+        if not self.on_screen:
+            return
+         
         self.center = self.calculateCenter()
         x, y = self.projection()     
         radius = 4

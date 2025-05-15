@@ -8,6 +8,9 @@ class Point(GraphicObject):
         self.color = None
 
     def draw(self, viewport):
+        if not self.on_screen:
+            return
+        
         self.id = viewport.scene().addEllipse(self.points[0][0], self.points[0][1], 5,5, QPen(self.color), QBrush(self.color))
         
 

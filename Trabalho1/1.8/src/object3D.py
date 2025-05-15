@@ -15,6 +15,9 @@ class Object3D(GraphicObject):
         return [p.points[0] for p in self.points]
 
     def draw(self, viewport):
+        if not self.on_screen:
+            return
+        
         self.id = []
 
         if hasattr(self, 'clipped_edges') and self.clipped_edges:

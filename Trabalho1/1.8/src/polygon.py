@@ -11,6 +11,9 @@ class Polygon(GraphicObject):
         self.clipped_points = points.copy()
         
     def draw(self, viewport):
+        if not self.on_screen:
+            return
+        
         points = self.clipped_points if hasattr(self, 'clipped_points') else self.points
         size = len(points)
         self.id = []

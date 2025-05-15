@@ -13,6 +13,8 @@ class Curve(GraphicObject):
         
 
     def draw(self,viewport):
+        if not self.on_screen:
+            return
         if (self.type == "BSpline"):
             points = self.clipped_points if hasattr(self, 'clipped_points') else self.bSpline()
         elif (self.type == "Bezier"):

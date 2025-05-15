@@ -9,6 +9,8 @@ class Line(GraphicObject):
         self.draw_points = points
         
     def draw(self, viewport):
+        if not self.on_screen:
+            return
         self.id = viewport.scene().addLine(self.draw_points[0][0], self.draw_points[0][1], self.draw_points[1][0], self.draw_points[1][1], QPen(self.color))
     
     def translation(self, directions):
