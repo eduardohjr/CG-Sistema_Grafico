@@ -290,3 +290,14 @@ class Clipping():
         y1_clip = y0 + u2 * dy
 
         return (x0_clip, y0_clip, x1_clip, y1_clip)
+    
+    def clipping3dpoint(self, obj):
+        if hasattr(object, 'projection'):
+            x, y = object.projection()
+        else:
+            x, y = object.points[0]
+
+        if (x < self.minX) or (x > self.maxX) or (y < self.minY) or (y > self.maxY):
+            object.on_screen = False
+        else:
+            object.on_screen = True

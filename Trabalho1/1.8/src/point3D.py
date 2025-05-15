@@ -15,8 +15,7 @@ class Point3D(GraphicObject):
         x, y = self.projection()     
         radius = 4
         
-
-        self.id = QGraphicsEllipseItem(x - radius, -y - radius, radius * 2, radius * 2)
+        self.id = QGraphicsEllipseItem(x - radius, y - radius, radius * 2, radius * 2)
         self.id.setBrush(QBrush(self.color))
         viewport.scene().addItem(self.id)
 
@@ -43,9 +42,6 @@ class Point3D(GraphicObject):
         
         return x_ndc, y_ndc
 
-
-    
-    
     def translation(self, directions):
 
         dx, dy, dz = directions
@@ -193,4 +189,4 @@ class Point3D(GraphicObject):
         self.rotationPoint(angle, self.center, axis)
 
     def applyClipping(self, clipping):
-        pass
+        clipping.pointClippingCheck(self)
