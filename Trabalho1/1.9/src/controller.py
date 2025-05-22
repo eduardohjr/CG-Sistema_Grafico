@@ -653,9 +653,11 @@ class Controller():
                     for edge in obj.segments:
                         descritor.add_edge(edge[0], edge[1])
                 elif isinstance(obj, BezierSurface3D):
-                    for point in obj.points:
-                        x, y, z = point.points[0]
-                        descritor.add_vertex(x, y, z)
+                     for patch in obj.patches:
+                            for row in patch:
+                                for pt in row:
+                                    x, y, z = pt.points[0]
+                                    descritor.add_vertex(x, y, z)
                 else:
                     if isinstance(obj, Point3D):
                         x, y, z = obj.points[0]                
