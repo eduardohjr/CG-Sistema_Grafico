@@ -632,6 +632,7 @@ class Controller():
                         "object3d" if isinstance(obj, Object3D) else \
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
+                        "bezier" if isinstance(obj, BezierSurface3D) else \
                         obj.type 
                 
                 if obj_type == "polygon":
@@ -651,6 +652,10 @@ class Controller():
                         descritor.add_vertex(x, y, z)
                     for edge in obj.segments:
                         descritor.add_edge(edge[0], edge[1])
+                elif isinstance(obj, BezierSurface3D):
+                    for point in obj.points:
+                        x, y, z = point.points[0]
+                        descritor.add_vertex(x, y, z)
                 else:
                     if isinstance(obj, Point3D):
                         x, y, z = obj.points[0]                
@@ -673,6 +678,7 @@ class Controller():
                         "object3d" if isinstance(obj, Object3D) else \
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
+                        "bezier" if isinstance(obj, BezierSurface3D) else \
                         obj.type 
                     
                     if obj_type == "polygon":
@@ -692,6 +698,23 @@ class Controller():
                             descritor.add_vertex(x, y, z)
                         for edge in obj.segments:
                             descritor.add_edge(edge[0], edge[1])
+                    elif isinstance(obj, BezierSurface3D):
+                        for patch in obj.patches:
+                            for row in patch:
+                                for pt in row:
+                                    x, y, z = pt.points[0]
+                                    descritor.add_vertex(x, y, z)
+                        for i in range(len(obj.patches)):
+                            for j in range(len(obj.patches[i])):
+                                for k in range(len(obj.patches[i][j])):
+                                    index = i * len(obj.patches[i]) * len(obj.patches[i][j]) + j * len(obj.patches[i][j]) + k
+                                    descritor.add_edge(index, index + 1)
+                                descritor.add_edge(index, index + len(obj.patches[i][j]))
+                        for i in range(len(obj.patches)):
+                            for j in range(len(obj.patches[i][0])):
+                                for k in range(len(obj.patches[i])):
+                                    index = i * len(obj.patches[i]) * len(obj.patches[i][j]) + k * len(obj.patches[i][j]) + j
+                                    descritor.add_edge(index, index + len(obj.patches[i]))
                     else:
                         if isinstance(obj, Point3D):
                             x, y, z = obj.points[0]                
@@ -757,8 +780,8 @@ class Controller():
                             obj_type = 'point'
                         elif 'Type: line' in line:
                             obj_type = 'line'
-                        elif 'Type: Bezier' in line:
-                            obj_type = 'Bezier'
+                        elif 'Type: bezier' in line:
+                            obj_type = 'bezier'
                         elif 'Type: BSpline' in line:
                             obj_type = 'BSpline'
                         elif 'Type: point3d' in line:
@@ -778,7 +801,7 @@ class Controller():
                     if parts[0] == 'v':
                         try:
                             x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
-                            if obj_type in ['point3d', 'object3d']:
+                            if obj_type in ['point3d', 'object3d', 'bezier']:
                                 current_vertices.append((x, y, z))
                             else:
                                 current_vertices.append((x, y))
@@ -820,6 +843,9 @@ class Controller():
                             obj.draw(self.__viewport)
                         elif (isinstance(obj, Point3D)):
                             obj.applyClipping(window.normalizedWindow.clipping)                            
+                            obj.draw(self.__viewport)
+                        elif(isinstance(obj, BezierSurface3D)):
+                            obj.applyClipping(window.normalizedWindow.clipping)
                             obj.draw(self.__viewport)
                         
                         current_vertices = []
@@ -871,6 +897,11 @@ class Controller():
             obj = Line([vertices[0], vertices[1]])
         elif obj_type == 'polygon':
             obj = Polygon(vertices, filled=filled)
+        elif obj_type == 'bezier':
+            vertice = ' '.join(str(tup) for tup in vertices)
+            create = BezierSurface3D.from_text_input(vertice)
+            obj = BezierSurface3D(create)
+            
         else:
             obj = Curve(vertices, obj_type)
 
