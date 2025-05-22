@@ -872,9 +872,10 @@ class Controller():
                     elif (isinstance(obj, Point3D)):
                         obj.applyClipping(window.normalizedWindow.clipping)                            
                         obj.draw(self.__viewport)
-                        
-                        
-                    
+                    elif (isinstance(obj, BezierSurface3D)):
+                        obj.applyClipping(window.normalizedWindow.clipping)
+                        obj.draw(self.__viewport)
+                         
             self.__viewport.update()
                         
         except Exception as e:
@@ -886,6 +887,10 @@ class Controller():
             
     def _create_object_from_data(self, vertices, edges, obj_type, filled=False):
         obj = None
+
+        def tuple_to_str(t):
+            return f"({t[0]},{t[1]},{t[2]})"
+
         if obj_type == 'point':
             obj = Point([vertices[0]])
         elif obj_type == 'point3d':
@@ -899,23 +904,23 @@ class Controller():
             obj = Polygon(vertices, filled=filled)
         elif obj_type == 'bezier':
             vertice = ""
-            for n in range(len(vertices)):
-                if (n + 1) % 4 == 0 and n != 0:
-                    vertice += str(vertices[n]) + ";"
+            for i in range(len(vertices)):
+                vertice += tuple_to_str(vertices[i])
+                if (i + 1) % 4 == 0:
+                    vertice += ";"
                 else:
-                    vertice += str(vertices[n]) + ","
-            vertice = vertice[:-1]
-            print(vertice)
-            create = BezierSurface3D.from_text_input(vertice)
-            obj = BezierSurface3D(create)
-            
+                    vertice += ","
+            vertice = vertice.strip(";")
+            patches = BezierSurface3D.from_text_input(vertice)
+            obj = BezierSurface3D(patches)
         else:
             obj = Curve(vertices, obj_type)
 
         if obj and self.current_color:
             obj.color = self.current_color
-            
+
         if obj:
             self.__viewport.objects.append(obj)
             self.addTree(obj)
+
         return obj

@@ -331,12 +331,12 @@ class Clipping():
                             x += b * px
                             y += b * py
                             z += b * pz
-                    grid[i][j] = Point3D([(x, y, z)]).projection()
+                    grid[i][j] = Point3D([(x, y, z)])
 
             for i in range(steps):
                 for j in range(steps - 1):
-                    p1 = grid[i][j]
-                    p2 = grid[i][j+1]
+                    p1 = grid[i][j].projection()
+                    p2 = grid[i][j+1].projection()
                     clipped = self.clippingSegments(p1, p2)
                     if clipped:
                         surface.clipped_edges.append(clipped)
@@ -344,8 +344,8 @@ class Clipping():
 
             for j in range(steps):
                 for i in range(steps - 1):
-                    p1 = grid[i][j]
-                    p2 = grid[i+1][j]
+                    p1 = grid[i][j].projection()
+                    p2 = grid[i+1][j].projection()
                     clipped = self.clippingSegments(p1, p2)
                     if clipped:
                         surface.clipped_edges.append(clipped)
