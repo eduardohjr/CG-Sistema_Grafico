@@ -898,7 +898,14 @@ class Controller():
         elif obj_type == 'polygon':
             obj = Polygon(vertices, filled=filled)
         elif obj_type == 'bezier':
-            vertice = ' '.join(str(tup) for tup in vertices)
+            vertice = ""
+            for n in range(len(vertices)):
+                if (n + 1) % 4 == 0 and n != 0:
+                    vertice += str(vertices[n]) + ";"
+                else:
+                    vertice += str(vertices[n]) + ","
+            vertice = vertice[:-1]
+            print(vertice)
             create = BezierSurface3D.from_text_input(vertice)
             obj = BezierSurface3D(create)
             
