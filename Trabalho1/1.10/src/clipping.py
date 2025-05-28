@@ -353,8 +353,6 @@ class Clipping():
     
 
     def bSplineSurfaceClipping(self, surface):
-        from point3D import Point3D
-
         surface.clipped_edges = []
         surface.on_screen = False
 
