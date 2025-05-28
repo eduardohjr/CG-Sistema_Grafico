@@ -135,42 +135,6 @@ class BSplineSurface3D(GraphicObject):
                 self.id.append(viewport.scene().addLine(x1, y1, x2, y2, QPen(self.color)))
 
 
-    def delta_matrix(self, d):
-        d2 = d * d
-        d3 = d2 * d
-        return np.array([
-            [0, 0, 0, 1],
-            [d3, d2, d, 0],
-            [6*d3, 2*d2, 0, 0],
-            [6*d3, 0, 0, 0]
-        ])
-
-    def bspline_basis_matrix(self):
-        return np.array([
-            [-1/6, 1/2, -1/2, 1/6],
-            [1/2, -1, 1/2, 0],
-            [-1/2, 0, 1/2, 0],
-            [1/6, 2/3, 1/6, 0]
-        ])
-
-    def fwd_diff(self, n, x, dx, d2x, d3x, y, dy, d2y, d3y, z, dz, d2z, d3z):
-        pts = [[x, y, z]]
-        for _ in range(1, n):
-            x += dx
-            dx += d2x
-            d2x += d3x
-
-            y += dy
-            dy += d2y
-            d2y += d3y
-
-            z += dz
-            dz += d2z
-            d2z += d3z
-
-            pts.append([x, y, z])
-        return pts
-
     def applyClipping(self, clipping):
         return clipping.bSplineSurfaceClipping(self)
 
@@ -195,8 +159,6 @@ class BSplineSurface3D(GraphicObject):
                 patches.append(patch)
         return patches
     
-    def applyClipping(self, clipping):
-        return clipping.bSplineSurfaceClipping(self)
 
     def translation(self, directions):
         for patch in self.patches:
