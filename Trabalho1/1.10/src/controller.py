@@ -147,9 +147,14 @@ class Controller():
                     try:
                             points = []
                             segments = []
-                            for i in range(len(points_values)):
+                            if len(points_values[i]) == 3:
                                 x, y, z = map(float, points_values[i])
-                                points.append(Point3D([(x,y,z)]))
+                            elif len(points_values[i]) == 2:
+                                x, y = map(float, points_values[i])
+                                z = 0.0
+                            else:
+                                raise ValueError(f"Invalid point: {points_values[i]}")
+                            points.append(Point3D([(x, y, z)]))
                             for i in range(len(segments_values)):
                                 p1,p2 = map(int, segments_values[i])
                                 segments.append((p1,p2))
@@ -676,6 +681,7 @@ class Controller():
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
                         "bezier" if isinstance(obj, BezierSurface3D) else \
+                        "bspline" if isinstance(obj, BSplineSurface3D) else \
                         obj.type 
                 
                 if obj_type == "polygon":
@@ -695,12 +701,23 @@ class Controller():
                         descritor.add_vertex(x, y, z)
                     for edge in obj.segments:
                         descritor.add_edge(edge[0], edge[1])
-                elif isinstance(obj, BezierSurface3D):
-                     for patch in obj.patches:
+                elif isinstance(obj, BezierSurface3D) or isinstance(obj, BSplineSurface3D):
+                        for patch in obj.patches:
                             for row in patch:
                                 for pt in row:
                                     x, y, z = pt.points[0]
                                     descritor.add_vertex(x, y, z)
+                        for i in range(len(obj.patches)):
+                            for j in range(len(obj.patches[i])):
+                                for k in range(len(obj.patches[i][j])):
+                                    index = i * len(obj.patches[i]) * len(obj.patches[i][j]) + j * len(obj.patches[i][j]) + k
+                                    descritor.add_edge(index, index + 1)
+                                descritor.add_edge(index, index + len(obj.patches[i][j]))
+                        for i in range(len(obj.patches)):
+                            for j in range(len(obj.patches[i][0])):
+                                for k in range(len(obj.patches[i])):
+                                    index = i * len(obj.patches[i]) * len(obj.patches[i][j]) + k * len(obj.patches[i][j]) + j
+                                    descritor.add_edge(index, index + len(obj.patches[i]))
                 else:
                     if isinstance(obj, Point3D):
                         x, y, z = obj.points[0]                
@@ -724,6 +741,7 @@ class Controller():
                         "line" if isinstance(obj, Line) else \
                         "polygon" if isinstance(obj, Polygon) else \
                         "bezier" if isinstance(obj, BezierSurface3D) else \
+                        "bspline" if isinstance(obj, BSplineSurface3D) else \
                         obj.type 
                     
                     if obj_type == "polygon":
@@ -743,7 +761,7 @@ class Controller():
                             descritor.add_vertex(x, y, z)
                         for edge in obj.segments:
                             descritor.add_edge(edge[0], edge[1])
-                    elif isinstance(obj, BezierSurface3D):
+                    elif isinstance(obj, BezierSurface3D) or isinstance(obj, BSplineSurface3D):
                         for patch in obj.patches:
                             for row in patch:
                                 for pt in row:
@@ -779,7 +797,6 @@ class Controller():
                     file.write("\n")
 
     def loadFromObj(self, filename):
-        try:
             base_filename = filename[:-4] if filename.endswith('.obj') else filename
             mtl_filename = f"{base_filename}.mtl"
             colors = {}
@@ -827,8 +844,8 @@ class Controller():
                             obj_type = 'line'
                         elif 'Type: bezier' in line:
                             obj_type = 'bezier'
-                        elif 'Type: BSpline' in line:
-                            obj_type = 'BSpline'
+                        elif 'Type: bspline' in line:
+                            obj_type = 'bspline'
                         elif 'Type: point3d' in line:
                             obj_type = 'point3d'
                         elif 'Type: object3d' in line:
@@ -846,7 +863,7 @@ class Controller():
                     if parts[0] == 'v':
                         try:
                             x, y, z = float(parts[1]), float(parts[2]), float(parts[3])
-                            if obj_type in ['point3d', 'object3d', 'bezier']:
+                            if obj_type in ['point3d', 'object3d', 'bezier', 'bspline']:
                                 current_vertices.append((x, y, z))
                             else:
                                 current_vertices.append((x, y))
@@ -892,6 +909,9 @@ class Controller():
                         elif(isinstance(obj, BezierSurface3D)):
                             obj.applyClipping(window.normalizedWindow.clipping)
                             obj.draw(self.__viewport)
+                        elif(isinstance(obj, BSplineSurface3D)):
+                            obj.applyClipping(window.normalizedWindow.clipping)
+                            obj.draw(self.__viewport)
                         
                         current_vertices = []
                         current_edges = []
@@ -920,21 +940,19 @@ class Controller():
                     elif (isinstance(obj, BezierSurface3D)):
                         obj.applyClipping(window.normalizedWindow.clipping)
                         obj.draw(self.__viewport)
+                    elif (isinstance(obj, BSplineSurface3D)):
+                        obj.applyClipping(window.normalizedWindow.clipping)
+                        obj.draw(self.__viewport)
                          
             self.__viewport.update()
                         
-        except Exception as e:
-            msg = QMessageBox()
-            msg.setWindowTitle("Error")
-            msg.setText(f"Failed to load file: {str(e)}")
-            msg.setIcon(QMessageBox.Warning)
-            msg.exec_()
+        
             
     def _create_object_from_data(self, vertices, edges, obj_type, filled=False):
         obj = None
 
         def tuple_to_str(t):
-            return f"({t[0]},{t[1]},{t[2]})"
+            return f"({','.join(str(x) for x in t)})"
 
         if obj_type == 'point':
             obj = Point([vertices[0]])
@@ -955,9 +973,22 @@ class Controller():
                     vertice += ";"
                 else:
                     vertice += ","
+            print(vertice)
             vertice = vertice.strip(";")
             patches = BezierSurface3D.from_text_input(vertice)
             obj = BezierSurface3D(patches)
+        elif obj_type == 'bspline':
+            vertice = ""
+            print(vertices)
+            for i in range(len(vertices)):
+                vertice += tuple_to_str(vertices[i])
+                if (i + 1) % 4 == 0:
+                    vertice += ";"
+                else:
+                    vertice += ","
+            vertice = vertice.strip(";")
+            patches = BSplineSurface3D.from_text_input(vertice)
+            obj = BSplineSurface3D(patches)
         else:
             obj = Curve(vertices, obj_type)
 
