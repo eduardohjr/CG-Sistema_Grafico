@@ -973,13 +973,11 @@ class Controller():
                     vertice += ";"
                 else:
                     vertice += ","
-            print(vertice)
             vertice = vertice.strip(";")
             patches = BezierSurface3D.from_text_input(vertice)
             obj = BezierSurface3D(patches)
         elif obj_type == 'bspline':
             vertice = ""
-            print(vertices)
             for i in range(len(vertices)):
                 vertice += tuple_to_str(vertices[i])
                 if (i + 1) % 4 == 0:
